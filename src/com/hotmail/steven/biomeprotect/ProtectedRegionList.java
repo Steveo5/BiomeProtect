@@ -22,6 +22,14 @@ public class ProtectedRegionList<E> {
         elements[size++] = e;
     }
     
+    public void remove(E e)
+    {
+    	for(int i=0;i<elements.length;i++)
+    	{
+    		if(elements[i] != null && elements[i].equals(e)) elements[i] = null;
+    	}
+    }
+    
     /**
      * Get all protected regions intercepting a block
      * @param loc
@@ -32,7 +40,6 @@ public class ProtectedRegionList<E> {
     	List<ProtectedRegion> intercepting = new ArrayList<ProtectedRegion>();
     	
     	// Brute force for now
-
     	for(int i=0;i<elements.length;i++)
     	{
     		if(elements[i] == null || !(elements[i] instanceof ProtectedRegion)) continue;

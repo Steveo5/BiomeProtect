@@ -6,14 +6,17 @@ import org.bukkit.Location;
 
 public class ProtectedRegion {
 
-	private Location point1, point2;
+	private Location center, point1, point2;
+	private int radius, height;
 	private UUID owner;
 	
-	public ProtectedRegion(UUID owner, Location point1, Location point2)
+	public ProtectedRegion(UUID owner, Location center, int height, int radius)
 	{
 		this.owner = owner;
-		this.point1 = point1;
-		this.point2 = point2;
+		this.center = center;
+		this.radius = radius;
+		point1 = this.center.clone().subtract(radius, height, radius);
+		point2 = this.center.clone().add(radius, height, radius);
 	}
 	
 	public Location getSmallerPoint()
@@ -24,6 +27,31 @@ public class ProtectedRegion {
 	public Location getLargerPoint()
 	{
 		return point2;
+	}
+	
+	public Location getCenter()
+	{
+		return center;
+	}
+	
+	public int getHeight()
+	{
+		return height;
+	}
+	
+	public  int getRadius()
+	{
+		return radius;
+	}
+	
+	public UUID getOwner()
+	{
+		return owner;
+	}
+	
+	public void remove()
+	{
+		BiomeProtect.removeProtectedRegion(this);
 	}
 	
 }
