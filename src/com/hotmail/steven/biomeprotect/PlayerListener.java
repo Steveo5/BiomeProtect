@@ -103,7 +103,7 @@ public class PlayerListener implements Listener {
 	}
 	
 	/**
-	 * Called when a player leaves a region they\
+	 * Called when a player leaves a region they
 	 * were previously in
 	 * @param player
 	 * @param region

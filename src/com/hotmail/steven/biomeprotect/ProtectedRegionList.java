@@ -44,9 +44,8 @@ public class ProtectedRegionList<E> {
     	{
     		if(elements[i] == null || !(elements[i] instanceof ProtectedRegion)) continue;
     		ProtectedRegion region = (ProtectedRegion)elements[i];
-    		System.out.println("Region  minx " + region.getSmallerPoint().getBlockX() + " miny " + region.getSmallerPoint().getBlockY() + " minz " + region.getSmallerPoint().getBlockZ() 
-    				+ " maxx " + region.getLargerPoint().getBlockX() + " maxy " + region.getLargerPoint().getBlockY() + " maxz " + region.getLargerPoint().getBlockZ());
-    		System.out.println("Dist min " + region.getSmallerPoint().distance(loc) + " max " +  region.getLargerPoint().distance(loc));
+    		// Do a distance calculation
+    		// TODO Check height
     		if(region.getSmallerPoint().distance(loc) < 20 && region.getLargerPoint().distance(loc) < 20)
     		{
     			intercepting.add(region);

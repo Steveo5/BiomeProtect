@@ -16,7 +16,9 @@ public class BiomeProtect extends JavaPlugin {
 	public void onEnable()
 	{
 		regions = new ProtectedRegionList<ProtectedRegion>();
-		
+		// Save default config if needed
+		this.saveDefaultConfig();
+		// Register player listener
 		getServer().getPluginManager().registerEvents(new PlayerListener(), this);
 	}
 	
