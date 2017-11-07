@@ -10,6 +10,14 @@ public class RegionSettings {
 	{
 		return "mysql";
 	}
+
+	/**
+	 * If using mysql, get the url of the server
+	 */
+	public static String getMysqlUrl()
+	{
+		return "localhost";
+	}
 	
 	/**
 	 * If using mysql, the username
@@ -17,7 +25,7 @@ public class RegionSettings {
 	 */
 	public static String getMysqlUser()
 	{
-		return "steve";
+		return "root";
 	}
 	
 	/**
@@ -26,7 +34,7 @@ public class RegionSettings {
 	 */
 	public static String getMysqlPass()
 	{
-		return "C0nnect.2u";
+		return "";
 	}
 	
 	public static int getMysqlPort()

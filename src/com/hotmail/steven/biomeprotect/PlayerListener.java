@@ -11,6 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import static com.hotmail.steven.biomeprotect.Language.tl;
 
 public class PlayerListener implements Listener {
 
@@ -27,14 +28,15 @@ public class PlayerListener implements Listener {
 	{
 		// Where the block was placed
 		Location blockLocation = evt.getBlock().getLocation();
+		Player player = evt.getPlayer();
 		
-		if(BiomeProtect.findRegions(evt.getBlock()).isEmpty())
+		if(ProtectedRegion.hasPlacePermission(player.getUniqueId(), blockLocation))
 		{
 			ProtectedRegion region = BiomeProtect.defineRegion(evt.getPlayer(), blockLocation, 5, 5);
 			evt.getPlayer().sendMessage("New region created at your location");
 		} else
 		{
-			evt.getPlayer().sendMessage("A protected region already exists!");
+			tl(player, "noPlacePermission");
 		}
 	}
 	
@@ -43,13 +45,19 @@ public class PlayerListener implements Listener {
 	{
 		// Where the block was broken
 		Location blockLocation = evt.getBlock().getLocation();
-		
-		ProtectedRegion foundRegion = BiomeProtect.findRegionExact(blockLocation);
-		
-		if(foundRegion != null)
+		Player player = evt.getPlayer();
+		if(ProtectedRegion.hasBreakPermission(player.getUniqueId(), blockLocation))
 		{
-			foundRegion.remove();
-			evt.getPlayer().sendMessage("You have removed a protected region");
+			// Check if the player is breaking the internal region
+			ProtectedRegion innerRegion = BiomeProtect.findRegionExact(blockLocation);
+			if(innerRegion != null && innerRegion.getOwner().equals(player.getUniqueId()))
+			{
+				innerRegion.remove();
+				tl(player, "regionRemoved");
+			}			
+		} else
+		{
+			tl(player, "noBreakPermission");
 		}
 		
 	}

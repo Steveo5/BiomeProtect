@@ -11,15 +11,22 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class BiomeProtect extends JavaPlugin {
 	
 	private static ProtectedRegionList<ProtectedRegion> regions;
+	private static RegionData regionData;
+	private static BiomeProtect plugin;
 	
 	@Override
 	public void onEnable()
 	{
+		regionData = new RegionData(this);
 		regions = new ProtectedRegionList<ProtectedRegion>();
 		// Save default config if needed
 		this.saveDefaultConfig();
 		// Register player listener
 		getServer().getPluginManager().registerEvents(new PlayerListener(), this);
+		
+		this.getCommand("biomeprotect").setExecutor(new CommandHandler());
+		
+		plugin = this;
 	}
 	
 	@Override
@@ -27,6 +34,12 @@ public class BiomeProtect extends JavaPlugin {
 	{
 		
 	}
+	
+	public static BiomeProtect instance()
+	{
+		return plugin;
+	}
+	
 	
 	/**
 	 * Create a protected region for a player

@@ -7,9 +7,9 @@
  database: false
  
  commands:
-   gamemode:
-     description: Set your gamemode
-     aliases: [gm, gmode]
+   biomeprotect:
+     description: Base BiomeProtect command
+     aliases: [bp]
      permission: biomecore.gm
      usage: /gm creative|survival|adventure|spectator [player]
  permissions:
