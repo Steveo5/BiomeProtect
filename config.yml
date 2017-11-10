@@ -1,0 +1,11 @@
+# Configure custom protection stones here
+protection-stones:
+  small-protection:
+    title: &3Small Protection
+    block: diamond_block
+    radius: 5
+    custom-height: 10
+    prevent-place: true
+    prevent-break: true
+    welcome-message: Entered %player%s protection
+    leave-message: Left %players%s protection

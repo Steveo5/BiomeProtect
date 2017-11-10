@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -40,6 +41,14 @@ public class BiomeProtect extends JavaPlugin {
 		return plugin;
 	}
 	
+	/**
+	 * Get the main config.yml
+	 * @return
+	 */
+	public static FileConfiguration getRegionConfig()
+	{
+		return plugin.getConfig();
+	}
 	
 	/**
 	 * Create a protected region for a player
