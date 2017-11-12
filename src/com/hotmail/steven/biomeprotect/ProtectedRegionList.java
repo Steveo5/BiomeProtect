@@ -58,7 +58,10 @@ public class ProtectedRegionList<E> {
     public List<ProtectedRegion> intercepts(Chunk chunk)
     {
     	List<ProtectedRegion> intercepting = new ArrayList<ProtectedRegion>();
-
+    	// We use this for the step size in checking so we don't miss any regions
+    	int smallestRadius = RegionSettings.getSmallestProtectionStone().getRadius();
+    	
+    	
     	return intercepting;
     }
     

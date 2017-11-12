@@ -15,6 +15,7 @@ public class BiomeProtect extends JavaPlugin {
 	private static ProtectedRegionList<ProtectedRegion> regions;
 	private static RegionData regionData;
 	private static BiomeProtect plugin;
+	private static RegionCache regionCache;
 	
 	@Override
 	public void onEnable()
@@ -31,6 +32,7 @@ public class BiomeProtect extends JavaPlugin {
 		plugin = this;
 		
 		RegionSettings.loadProtectionStones();
+		regionCache = new RegionCache();
 	}
 	
 	@Override
@@ -42,6 +44,35 @@ public class BiomeProtect extends JavaPlugin {
 	public static BiomeProtect instance()
 	{
 		return plugin;
+	}
+	
+	/**
+	 * Holds the database/flatfile methods to store
+	 * and retrieve protection stones
+	 * @return
+	 */
+	public static RegionData getRegionData()
+	{
+		return regionData;
+	}
+	
+	/**
+	 * Get all the cached regions for
+	 * faster checking
+	 * @return
+	 */
+	public static RegionCache getRegionCache()
+	{
+		return regionCache;
+	}
+	
+	/**
+	 * Get all of the protected regions that exist
+	 * @return
+	 */
+	public static ProtectedRegionList<ProtectedRegion> getRegions()
+	{
+		return regions;
 	}
 	
 	/**

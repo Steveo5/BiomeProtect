@@ -102,6 +102,31 @@ public class PlayerListener implements Listener {
 				playerExitedRegion(player, playersRegion, evt);
 			}
 		}
+		
+		// If the player moved a chunk
+		if(evt.getFrom().getChunk().getX() != evt.getTo().getChunk().getX() || evt.getFrom().getChunk().getZ() != evt.getTo().getChunk().getZ())
+		{
+			onPlayerMoveChunk(evt);
+		}
+	}
+	
+	/**
+	 * When the player moves a chunk
+	 * @param evt
+	 */
+	public void onPlayerMoveChunk(PlayerMoveEvent evt)
+	{
+		// Get the regions in the chunk
+		List<ProtectedRegion> regionsInChunk = BiomeProtect.getRegions().intercepts(evt.getTo().getChunk());
+		
+		for(ProtectedRegion region : regionsInChunk)
+		{
+			// Generate a region id based on the center block
+			int regionId = region.getCenter().getBlockX() + region.getCenter().getBlockY() + region.getCenter().getBlockZ();
+			
+			// Cache the region for faster all round checks
+			BiomeProtect.getRegionCache().add(regionId, region);
+		}
 	}
 	
 	/**

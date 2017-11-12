@@ -109,6 +109,24 @@ public class RegionSettings {
 	}
 	
 	/**
+	 * Get the smallest protection stone
+	 * @return
+	 */
+	public static ProtectionStone getSmallestProtectionStone()
+	{
+		ProtectionStone smallest = protectionStones.get(0);
+		for(ProtectionStone pStone : protectionStones)
+		{
+			if(pStone.getRadius() < smallest.getRadius())
+			{
+				smallest = pStone;
+			}
+		}
+		
+		return smallest;
+	}
+	
+	/**
 	 * Check
 	 * @param item
 	 * @return
