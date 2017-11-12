@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 
 public class ProtectedRegionList<E> {
@@ -46,12 +47,39 @@ public class ProtectedRegionList<E> {
     		ProtectedRegion region = (ProtectedRegion)elements[i];
     		// Do a distance calculation
     		// TODO Check height
-    		if(region.getSmallerPoint().distance(loc) < 20 && region.getLargerPoint().distance(loc) < 20)
+    		if(boxContains(region.getSmallerPoint(), region.getLargerPoint(), loc))
     		{
     			intercepting.add(region);
     		}
     	}
     	return intercepting;
+    }
+    
+    public List<ProtectedRegion> intercepts(Chunk chunk)
+    {
+    	List<ProtectedRegion> intercepting = new ArrayList<ProtectedRegion>();
+
+    	return intercepting;
+    }
+    
+    /**
+     * Checks if a location exists between a small
+     * and larger point
+     * @param smaller
+     * @param larger
+     * @param search
+     * @return
+     */
+    private boolean boxContains(Location smaller, Location larger, Location search)
+    {
+    	if(search.getBlockX() > smaller.getBlockX() && search.getBlockY() > smaller.getBlockY() && search.getBlockZ() > smaller.getBlockZ())
+    	{
+    		if(search.getBlockX() < larger.getBlockX() && search.getBlockY() < larger.getBlockY() && search.getBlockZ() < larger.getBlockZ())
+    		{
+    			return true;
+    		}
+    	}
+    	return false;
     }
 
 

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -28,6 +29,8 @@ public class BiomeProtect extends JavaPlugin {
 		this.getCommand("biomeprotect").setExecutor(new CommandHandler());
 		
 		plugin = this;
+		
+		RegionSettings.loadProtectionStones();
 	}
 	
 	@Override
@@ -56,22 +59,9 @@ public class BiomeProtect extends JavaPlugin {
 	 * @param point1
 	 * @param point2
 	 */
-	public static ProtectedRegion defineRegion(Player owner, Location center, int height, int radius)
+	public static ProtectedRegion defineRegion(ProtectionStone settings, Player owner, Location center)
 	{
-		return defineRegion(owner.getUniqueId(), center, height, radius);
-	}
-	
-	
-	/**
-	 * Create a protected region for a player
-	 * @param owner
-	 * @param point1
-	 * @param point2
-	 */
-	public static ProtectedRegion defineRegion(UUID owner, Location center, int height, int radius)
-	{
-		// Create the new base region
-		ProtectedRegion region = new ProtectedRegion(owner, center, height, radius);
+		ProtectedRegion region = new ProtectedRegion(settings, owner.getUniqueId(), center);
 		regions.add(region);
 		return region;
 	}

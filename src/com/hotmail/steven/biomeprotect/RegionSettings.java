@@ -2,11 +2,18 @@ package com.hotmail.steven.biomeprotect;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.inventory.ItemStack;
+
+import com.hotmail.steven.util.StringUtil;
 
 public class RegionSettings {
 
+	private static List<ProtectionStone> protectionStones;
+	
 	/**
 	 * Get the database type, either flatfile, mysql
 	 * @return
@@ -52,61 +59,94 @@ public class RegionSettings {
 		return "regions";
 	}
 	
+	// Load the protection stones from the database
+	protected static void loadProtectionStones()
+	{
+		protectionStones = new ArrayList<ProtectionStone>();
+		int loaded = 0;
+		for(ConfigurationSection configSection : getProtectionList())
+		{
+			Material mat = Material.valueOf(configSection.getString("block").toUpperCase());
+			int data = configSection.contains("data") ? data = configSection.getInt("data") : 0;
+			int radius = configSection.getInt("radius");
+			
+			ProtectionStone protectionStone = new ProtectionStone(configSection.getName(), mat, data, radius);
+			
+			if(configSection.contains("custom-height")) protectionStone.setCustomHeight(configSection.getInt("custom-height"));
+			if(configSection.contains("prevent-place")) protectionStone.setAllowsPlace(configSection.getBoolean("prevent-place"));
+			if(configSection.contains("prevent-break")) protectionStone.setAllowsBreak(configSection.getBoolean("prevent-break"));
+			if(configSection.contains("meta.title")) protectionStone.setTitle(configSection.getString("meta.title"));
+			if(configSection.contains("welcome-message")) protectionStone.setWelcomeMessage(configSection.getString("welcome-message"));
+			if(configSection.contains("leave-message")) protectionStone.setLeaveMessage(configSection.getString("leave-message"));
+			if(configSection.isList("meta.lore")) protectionStone.setLore(configSection.getStringList("meta.lore"));
+			protectionStones.add(protectionStone);
+			System.out.println("Loaded " + protectionStone.getTitle());
+			loaded++;
+		}
+		
+		Logger.Log(Level.INFO, loaded + " protection stones were loaded");
+	}
+	
+	// Get the loaded protection stones
+	public static List<ProtectionStone> getProtectionStones()
+	{
+		return protectionStones;
+	}
+	
 	/**
 	 * Get a list of protection names
 	 * @return
 	 */
-	public static List<String> getProtectionList()
+	private static List<ConfigurationSection> getProtectionList()
 	{
-		List<String> protectionNames = new ArrayList<String>();
+		List<ConfigurationSection> protectionNames = new ArrayList<ConfigurationSection>();
 		// Get all the protection headers
 		for(String key : BiomeProtect.getRegionConfig().getConfigurationSection("protection-stones").getKeys(false))
 		{
-			protectionNames.add(key);
+			protectionNames.add(BiomeProtect.getRegionConfig().getConfigurationSection("protection-stones." + key));
 		}
 		return protectionNames;
 	}
 	
-	public static boolean hasProtectionStone(String protectionName)
-	{
-		return getProtectionList().contains(protectionName);
-	}
-	
 	/**
-	 * Get the material for a specific protection stone
-	 * @param name
-	 * @return air if the name isn't found
+	 * Check
+	 * @param item
+	 * @return
 	 */
-	public static Material getMaterial(String protectionName)
+	public static boolean isProtectionStone(ItemStack item)
 	{
-		Material mat = Material.AIR;
-		if(getProtectionList().contains(protectionName))
+		for(ProtectionStone pStone : getProtectionStones())
 		{
-			try
+			if(item.getType() == pStone.getMaterial())
 			{
-				mat = Material.valueOf(BiomeProtect.getRegionConfig().getString("protection-stones." + protectionName + ".block").toUpperCase());
-			} catch(Exception e) {};
+				if(pStone.hasTitle())
+				{
+					if(item.hasItemMeta() && item.getItemMeta().getDisplayName().equals(pStone.getTitle()))
+					{
+						return true;
+					}
+				}
+			}
 		}
 		
-		return mat;
+		return false;
 	}
 	
-	/**
-	 * Get the radius for a protection stone
-	 * @param protectionName
-	 * @return -1 if the protection stone isn't found
-	 */
-	public static int getRadius(String protectionName)
+	public static ProtectionStone getProtectionStone(ItemStack item)
 	{
-		int radius = -1;
-		if(getProtectionList().contains(protectionName))
+		for(ProtectionStone pStone : getProtectionStones())
 		{
-			try
+			if(item.getType() == pStone.getMaterial())
 			{
-				radius = BiomeProtect.getRegionConfig().getInt("protection-stones." + protectionName);
-			} catch(Exception e) {};
-		}		
-		return radius;
+				if(pStone.hasTitle())
+				{
+					if(item.hasItemMeta() && item.getItemMeta().getDisplayName().equals(pStone.getTitle()))
+					{
+						return pStone;
+					}
+				}
+			}
+		}	
+		return null;
 	}
-	
 }

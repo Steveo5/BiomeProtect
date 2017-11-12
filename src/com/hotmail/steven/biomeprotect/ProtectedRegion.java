@@ -10,21 +10,31 @@ import org.bukkit.block.Block;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 
-public class ProtectedRegion {
+public class ProtectedRegion extends ProtectionStone {
 
 	private Location center, point1, point2;
-	private int radius, height;
 	private UUID owner;
 	private List<Block> shownBlocks;
-	
-	public ProtectedRegion(UUID owner, Location center, int height, int radius)
+
+	public ProtectedRegion(ProtectionStone base, UUID owner, Location center)
 	{
+		super(base.getName(), base.getMaterial(), base.getData(), base.getRadius());
 		shownBlocks = new ArrayList<Block>();
 		this.owner = owner;
 		this.center = center;
-		this.radius = radius;
-		point1 = this.center.clone().subtract(radius, height, radius);
-		point2 = this.center.clone().add(radius, height, radius);
+		Location p1 = this.center.clone().subtract(base.getRadius(), base.getRadius(), base.getRadius());
+		Location p2 = this.center.clone().add(base.getRadius(), base.getRadius(), base.getRadius());
+		// Set the smaller and larger points
+		int p1X = p1.getBlockX() < p2.getBlockX() ? p1.getBlockX() : p2.getBlockX();
+		int p1Y = p1.getBlockY() < p2.getBlockY() ? p1.getBlockY() : p2.getBlockY();
+		int p1Z = p1.getBlockZ() < p2.getBlockZ() ? p1.getBlockZ() : p2.getBlockZ();
+		
+		int p2X = p1.getBlockX() > p2.getBlockX() ? p1.getBlockX() : p2.getBlockX();
+		int p2Y = p1.getBlockY() > p2.getBlockY() ? p1.getBlockY() : p2.getBlockY();
+		int p2Z = p1.getBlockZ() > p2.getBlockZ() ? p1.getBlockZ() : p2.getBlockZ();
+		
+		point1 = new Location(p1.getWorld(), p1X, p1Y, p1Z);
+		point2 = new Location(p2.getWorld(), p2X, p2Y, p2Z);
 	}
 	
 	public Location getSmallerPoint()
@@ -42,16 +52,6 @@ public class ProtectedRegion {
 		return center;
 	}
 	
-	public int getHeight()
-	{
-		return height;
-	}
-	
-	public  int getRadius()
-	{
-		return radius;
-	}
-	
 	public UUID getOwner()
 	{
 		return owner;
@@ -64,6 +64,7 @@ public class ProtectedRegion {
 	
 	public void show()
 	{
+		int radius = this.getRadius();
 		int p1X = point1.getBlockX() < point2.getBlockX() ? point1.getBlockX() : point2.getBlockX();
 		int p1Y = point1.getBlockY() < point2.getBlockY() ? point1.getBlockY() : point2.getBlockY();
 		int p1Z = point1.getBlockZ() < point2.getBlockZ() ? point1.getBlockZ() : point2.getBlockZ();
@@ -133,6 +134,11 @@ public class ProtectedRegion {
 		return uuid.equals(owner);
 	}
 	
+	public boolean isOwner(UUID uuid)
+	{
+		return uuid.equals(owner);
+	}
+	
 	/**
 	 * Checks if a user can break blocks at the location
 	 * @param uuid
@@ -148,7 +154,7 @@ public class ProtectedRegion {
 			for(ProtectedRegion region : foundRegions)
 			{
 				// Check ownership of the region
-				if(!region.getOwner().equals(uuid))
+				if(!region.hasPermission(uuid))
 				{
 					return false;
 				}
@@ -167,7 +173,7 @@ public class ProtectedRegion {
 			for(ProtectedRegion region : foundRegions)
 			{
 				// Check ownership of the region
-				if(!region.getOwner().equals(uuid))
+				if(!region.hasPermission(uuid))
 				{
 					return false;
 				}

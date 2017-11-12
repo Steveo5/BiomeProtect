@@ -32,8 +32,12 @@ public class PlayerListener implements Listener {
 		
 		if(ProtectedRegion.hasPlacePermission(player.getUniqueId(), blockLocation))
 		{
-			ProtectedRegion region = BiomeProtect.defineRegion(evt.getPlayer(), blockLocation, 5, 5);
-			evt.getPlayer().sendMessage("New region created at your location");
+			if(RegionSettings.isProtectionStone(evt.getItemInHand()))
+			{
+				ProtectionStone protectionStone = RegionSettings.getProtectionStone(evt.getItemInHand());
+				ProtectedRegion region = BiomeProtect.defineRegion(protectionStone, evt.getPlayer(), blockLocation);
+				evt.getPlayer().sendMessage("You have placed " + region.getName());
+			}
 		} else
 		{
 			tl(player, "noPlacePermission");
