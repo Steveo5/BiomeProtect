@@ -48,7 +48,7 @@ public class PlayerListener implements Listener {
 				ProtectedRegion region = BiomeProtect.findRegionExact(evt.getClickedBlock());
 				if(region != null)
 				{
-					RegionMenu.show(evt.getPlayer(), region);
+					BiomeProtect.getMenu().show(evt.getPlayer(), region);
 				}
 				interactLimit.put(p.getUniqueId(), System.currentTimeMillis());
 			}
