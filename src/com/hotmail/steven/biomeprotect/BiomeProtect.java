@@ -45,7 +45,7 @@ public class BiomeProtect extends JavaPlugin {
 		Logger.Log(Level.INFO, "Saving all regions to the database");
 		for(ProtectedRegion region : regions.getAll())
 		{
-			regionData.saveRegion(region);
+			regionData.saveRegion(region, false);
 		}
 	}
 	

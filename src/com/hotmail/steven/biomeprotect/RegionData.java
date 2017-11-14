@@ -244,8 +244,10 @@ public class RegionData {
 	/**
 	 * Saves a region to the database
 	 * @param region
+	 * @param create - specify if this is the first time
+	 * this protection stone is being entered into the db
 	 */
-	public void saveRegion(ProtectedRegion region)
+	public void saveRegion(ProtectedRegion region, boolean create)
 	{
 		UUID owner = region.getOwner();
 		int x = region.getCenter().getBlockX();
@@ -261,10 +263,15 @@ public class RegionData {
 		try
 		{
 			Statement stmt = connection.createStatement();
-			stmt.execute("REPLACE INTO cuboids (cuboid_id,owner,x,y,z,world,name,material,data,radius) "
-					+ "VALUES(" + id + ",'" + owner.toString() + "'," + x + "," + y + "," + z
-					+ ",'" + world.toString() + "','" + name + "','" + mat + "'," + data + "," + radius + ")");
-			
+			if(create)
+			{
+				stmt.execute("REPLACE INTO cuboids (cuboid_id,owner,x,y,z,world,name,material,data,radius) "
+						+ "VALUES(" + id + ",'" + owner.toString() + "'," + x + "," + y + "," + z
+						+ ",'" + world.toString() + "','" + name + "','" + mat + "'," + data + "," + radius + ")");
+			} else
+			{
+				//TODO update code
+			}
 			if(region.hasWelcomeMessage())
 			{
 				stmt.execute("REPLACE INTO cuboid_flags(cuboid_id,flag_id,value,enabled) VALUES(" + region.getId()

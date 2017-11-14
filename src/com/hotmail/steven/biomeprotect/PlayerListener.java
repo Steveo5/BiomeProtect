@@ -74,7 +74,7 @@ public class PlayerListener implements Listener {
 				// Cache the region
 				BiomeProtect.getRegionCache().add(region.getId(), region);
 				evt.getPlayer().sendMessage("You have placed " + region.getName());
-				BiomeProtect.getRegionData().saveRegion(region);
+				BiomeProtect.getRegionData().saveRegion(region, true);
 			}
 		} else
 		{
