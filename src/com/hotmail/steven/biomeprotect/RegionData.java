@@ -299,12 +299,13 @@ public class RegionData {
 		try
 		{
 			Statement stmt = connection.createStatement();
-			stmt.execute("DELETE FROM cuboids WHERE cuboid_id=" + id);
 			// Remove the flags
-			for(int i=1;i<6;i++)
+			for(int i=1;i<7;i++)
 			{
-				stmt.execute("DELETE FROM cuboid_flags WHERE (cuboid_id,flag_id) = (" + id + "" + id + ")");
+				stmt.execute("DELETE FROM cuboid_flags WHERE (cuboid_id,flag_id) = (" + id + "," + i + ")");
 			}
+			
+			stmt.execute("DELETE FROM cuboids WHERE cuboid_id=" + id);
 			stmt.close();
 		} catch(SQLException e)
 		{

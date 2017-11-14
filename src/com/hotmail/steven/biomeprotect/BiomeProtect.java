@@ -2,6 +2,7 @@ package com.hotmail.steven.biomeprotect;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -41,7 +42,11 @@ public class BiomeProtect extends JavaPlugin {
 	@Override
 	public void onDisable()
 	{
-		
+		Logger.Log(Level.INFO, "Saving all regions to the database");
+		for(ProtectedRegion region : regions.getAll())
+		{
+			regionData.saveRegion(region);
+		}
 	}
 	
 	public static BiomeProtect instance()
@@ -173,6 +178,7 @@ public class BiomeProtect extends JavaPlugin {
 	 */
 	public static void removeProtectedRegion(ProtectedRegion region)
 	{
+		regionData.removeRegion(region.getId());
 		regions.remove(region);
 	}
 	
