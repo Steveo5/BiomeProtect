@@ -1,25 +1,36 @@
 package com.hotmail.steven.biomeprotect;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
+
+import com.hotmail.steven.util.LocationUtil;
 
 public class ProtectedRegion extends ProtectionStone {
 
 	private Location center, point1, point2;
 	private UUID owner;
 	private List<Block> shownBlocks;
+	private HashSet<Chunk> chunks;
+	private int id;
+	private HashSet<Player> playersInRegion;
 
 	public ProtectedRegion(ProtectionStone base, UUID owner, Location center)
 	{
 		super(base.getName(), base.getMaterial(), base.getData(), base.getRadius());
 		shownBlocks = new ArrayList<Block>();
+		playersInRegion = new HashSet<Player>();
 		this.owner = owner;
 		this.center = center;
 		Location p1 = this.center.clone().subtract(base.getRadius(), base.getRadius(), base.getRadius());
@@ -35,6 +46,72 @@ public class ProtectedRegion extends ProtectionStone {
 		
 		point1 = new Location(p1.getWorld(), p1X, p1Y, p1Z);
 		point2 = new Location(p2.getWorld(), p2X, p2Y, p2Z);
+		// Generate id based on 3d to 1d
+		id = center.getBlockX() + center.getBlockY() + center.getBlockZ();
+		// Copy the flags over
+		if(base.hasWelcomeMessage()) setWelcomeMessage(base.getWelcomeMessage());
+		if(base.hasLeaveMessage()) setLeaveMessage(base.getLeaveMessage());
+		setAllowsBreak(base.allowsBreak());
+		setAllowsPlace(base.allowsPlace());
+		// Get existing chunks this region resides
+		chunks = LocationUtil.getAllChunks(point1, point2);
+		Logger.Log(Level.INFO, Bukkit.getOfflinePlayer(owner).getName() + " placed a field at " + center.getBlockX() + " " + center.getBlockY() + " " + center.getBlockZ());
+		Logger.Log(Level.INFO, "Region intercepts " + chunks.size() + " chunks");
+		Logger.Log(Level.INFO, "Min location " + point1.getBlockX() + " " + point1.getBlockY() + " " + point1.getBlockZ());
+		Logger.Log(Level.INFO, "Max location " + point2.getBlockX() + " " + point2.getBlockY() + " " + point2.getBlockZ());
+	}
+	
+	/**
+	 * Get all the chunks this region exists in
+	 * @return
+	 */
+	public HashSet<Chunk> getExistingChunks()
+	{
+		return chunks;
+	}
+	
+	/**
+	 * Get all the players that are currently in this region
+	 * @return
+	 */
+	protected HashSet<Player> getPlayers()
+	{
+		return playersInRegion;
+	}
+	
+	protected boolean isPlayerPersistantInside(Player player)
+	{
+		return getPlayers().contains(player);
+	}
+	
+	protected void addPlayerPersistant(Player player)
+	{
+		playersInRegion.add(player);
+	}
+	
+	protected void removePlayerPersistant(Player player)
+	{
+		playersInRegion.remove(player);
+	}
+	
+	/**
+	 * Check if a player is inside this region
+	 * @param uuid
+	 * @return
+	 */
+	public boolean isPlayerInside(Player player)
+	{
+		return isLocationInside(player.getLocation());
+	}
+	
+	public boolean isLocationInside(Location loc)
+	{
+		return LocationUtil.boxContains(getSmallerPoint(), getLargerPoint(), loc);
+	}
+	
+	public int getId()
+	{
+		return id;
 	}
 	
 	public Location getSmallerPoint()
@@ -60,6 +137,8 @@ public class ProtectedRegion extends ProtectionStone {
 	public void remove()
 	{
 		BiomeProtect.removeProtectedRegion(this);
+		if(BiomeProtect.getRegionCache().isCached(getId()))
+			BiomeProtect.getRegionCache().getCache().remove(getId());
 	}
 	
 	public void show()

@@ -16,7 +16,7 @@ public class BiomeProtect extends JavaPlugin {
 	private static RegionData regionData;
 	private static BiomeProtect plugin;
 	private static RegionCache regionCache;
-	
+
 	@Override
 	public void onEnable()
 	{
@@ -26,13 +26,16 @@ public class BiomeProtect extends JavaPlugin {
 		this.saveDefaultConfig();
 		// Register player listener
 		getServer().getPluginManager().registerEvents(new PlayerListener(), this);
-		
+		getServer().getPluginManager().registerEvents(new RegionMenu(), this);
 		this.getCommand("biomeprotect").setExecutor(new CommandHandler());
 		
 		plugin = this;
 		
 		RegionSettings.loadProtectionStones();
 		regionCache = new RegionCache();
+		
+		//TODO Implement in a different thread
+		regionData.loadRegions();
 	}
 	
 	@Override
@@ -70,7 +73,7 @@ public class BiomeProtect extends JavaPlugin {
 	 * Get all of the protected regions that exist
 	 * @return
 	 */
-	public static ProtectedRegionList<ProtectedRegion> getRegions()
+	public static ProtectedRegionList<ProtectedRegion> getRegionList()
 	{
 		return regions;
 	}
@@ -92,9 +95,20 @@ public class BiomeProtect extends JavaPlugin {
 	 */
 	public static ProtectedRegion defineRegion(ProtectionStone settings, Player owner, Location center)
 	{
-		ProtectedRegion region = new ProtectedRegion(settings, owner.getUniqueId(), center);
+		return defineRegion(settings, owner.getUniqueId(), center);
+	}
+	
+	/**
+	 * Create a protected region for a player
+	 * @param owner
+	 * @param point1
+	 * @param point2
+	 */
+	public static ProtectedRegion defineRegion(ProtectionStone settings, UUID owner, Location center)
+	{
+		ProtectedRegion region = new ProtectedRegion(settings, owner, center);
 		regions.add(region);
-		return region;
+		return region;		
 	}
 
 	/**
@@ -146,6 +160,11 @@ public class BiomeProtect extends JavaPlugin {
 	public static ProtectedRegion findRegionExact(Block block)
 	{
 		return findRegionExact(block.getLocation());
+	}
+	
+	public static ProtectedRegion getRegion(int id)
+	{
+		return getRegionCache().getCachedRegion(id);
 	}
 	
 	/**

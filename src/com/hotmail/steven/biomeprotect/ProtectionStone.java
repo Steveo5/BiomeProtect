@@ -20,6 +20,7 @@ public class ProtectionStone {
 	private String title = "";
 	private List<String> lore;
 	private String name;
+	private boolean preventPvp = false;
 	
 	public ProtectionStone(String name, Material type, int data, int radius)
 	{
@@ -33,6 +34,11 @@ public class ProtectionStone {
 	public String getName()
 	{
 		return name;
+	}
+	
+	public void setAllowsPvp(boolean allow)
+	{
+		this.preventPvp = allow;
 	}
 	
 	public void setAllowsBreak(boolean allow)
@@ -72,12 +78,17 @@ public class ProtectionStone {
 	
 	public boolean allowsBreak()
 	{
-		return !preventBreak;
+		return preventBreak;
 	}
 	
 	public boolean allowsPlace()
 	{
-		return !preventPlace;
+		return preventPlace;
+	}
+	
+	public boolean allowsPvp()
+	{
+		return preventPvp;
 	}
 	
 	public int getCustomHeight()

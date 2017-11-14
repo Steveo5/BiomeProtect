@@ -3,13 +3,20 @@ package com.hotmail.steven.biomeprotect;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import static com.hotmail.steven.biomeprotect.Language.tl;
 
@@ -17,10 +24,35 @@ public class PlayerListener implements Listener {
 
 	// Keep track of the region the player is currently in
 	private HashMap<UUID, ProtectedRegion> enteredRegions;
+	private HashMap<UUID, Long> interactLimit;
 	
 	public PlayerListener()
 	{
 		enteredRegions = new HashMap<UUID, ProtectedRegion>();
+		interactLimit = new HashMap<UUID, Long>();
+	}
+	
+	@EventHandler
+	public void onBlockClick(PlayerInteractEvent evt)
+	{
+		if(evt.getAction() == Action.RIGHT_CLICK_BLOCK)
+		{
+			Player p = evt.getPlayer();
+			// Get the time millis since last interact
+			long timeSinceLastInteract = interactLimit.containsKey(p.getUniqueId()) ? interactLimit.get(p.getUniqueId()) : 0;
+			// Calculate that in seconds
+			long timeInSeconds = (System.currentTimeMillis() - timeSinceLastInteract) / 1000;
+			// Check if they have interacted too much
+			if(timeInSeconds >= RegionSettings.getInteractLimit())
+			{
+				ProtectedRegion region = BiomeProtect.findRegionExact(evt.getClickedBlock());
+				if(region != null)
+				{
+					RegionMenu.show(evt.getPlayer(), region);
+				}
+				interactLimit.put(p.getUniqueId(), System.currentTimeMillis());
+			}
+		}
 	}
 	
 	@EventHandler
@@ -34,9 +66,15 @@ public class PlayerListener implements Listener {
 		{
 			if(RegionSettings.isProtectionStone(evt.getItemInHand()))
 			{
+				// Get the flags/settings for the protection stone
 				ProtectionStone protectionStone = RegionSettings.getProtectionStone(evt.getItemInHand());
+				System.out.println(protectionStone.getWelcomeMessage());
+				// Create the protected region physically
 				ProtectedRegion region = BiomeProtect.defineRegion(protectionStone, evt.getPlayer(), blockLocation);
+				// Cache the region
+				BiomeProtect.getRegionCache().add(region.getId(), region);
 				evt.getPlayer().sendMessage("You have placed " + region.getName());
+				BiomeProtect.getRegionData().saveRegion(region);
 			}
 		} else
 		{
@@ -82,29 +120,28 @@ public class PlayerListener implements Listener {
 	public void onPlayerMoveBlock(PlayerMoveEvent evt)
 	{
 		Player player = evt.getPlayer();
-		// Get the regions in the block the player is moving to
-		List<ProtectedRegion> regionsAtBlock = BiomeProtect.findRegions(evt.getTo().getBlock());
-		if(regionsAtBlock.size() == 1)
+		Location locTo = evt.getTo();
+		Location locFrom = evt.getFrom();
+
+		// Call player exited or entered region if required
+		for(ProtectedRegion region : BiomeProtect.getRegionCache().getCache().values())
 		{
-			ProtectedRegion playersRegion = enteredRegions.get(player.getUniqueId());
-			if(playersRegion == null || !playersRegion.equals(regionsAtBlock.get(0)))
+			// locFrom is in the region and locTo is not in the region > The player has left the region
+			if(region.isLocationInside(locFrom) && !region.isLocationInside(locTo))
 			{
-				enteredRegions.put(player.getUniqueId(), regionsAtBlock.get(0));
-				playerEnteredRegion(player, playersRegion, evt);
-			}
-		} else if(regionsAtBlock.size() < 1)
-		{
-			// All the regions at the previous block
-			ProtectedRegion playersRegion = enteredRegions.get(player.getUniqueId());
-			if(playersRegion != null)
+				playerExitedRegion(player, region, evt);
+			// Vice versa
+			} else if(!region.isLocationInside(locFrom) && region.isLocationInside(locTo))
 			{
-				enteredRegions.remove(player.getUniqueId());
-				playerExitedRegion(player, playersRegion, evt);
+				playerEnteredRegion(player, region, evt);
 			}
 		}
 		
+		Chunk from = evt.getFrom().getChunk();
+		Chunk to = evt.getTo().getChunk();
+		
 		// If the player moved a chunk
-		if(evt.getFrom().getChunk().getX() != evt.getTo().getChunk().getX() || evt.getFrom().getChunk().getZ() != evt.getTo().getChunk().getZ())
+		if(from.getX() != to.getX() || from.getZ() != to.getZ())
 		{
 			onPlayerMoveChunk(evt);
 		}
@@ -116,16 +153,22 @@ public class PlayerListener implements Listener {
 	 */
 	public void onPlayerMoveChunk(PlayerMoveEvent evt)
 	{
-		// Get the regions in the chunk
-		List<ProtectedRegion> regionsInChunk = BiomeProtect.getRegions().intercepts(evt.getTo().getChunk());
-		
-		for(ProtectedRegion region : regionsInChunk)
+
+		for(ProtectedRegion region : BiomeProtect.getRegionList().getAll())
 		{
-			// Generate a region id based on the center block
-			int regionId = region.getCenter().getBlockX() + region.getCenter().getBlockY() + region.getCenter().getBlockZ();
-			
-			// Cache the region for faster all round checks
-			BiomeProtect.getRegionCache().add(regionId, region);
+			for(Chunk chunkInRegion : region.getExistingChunks())
+			{
+				Location to = evt.getTo();
+				Chunk toChunk = to.getChunk();
+				// Cache the region if the player steps in a chunk where regions exist
+				if(toChunk.getX() == chunkInRegion.getX() && toChunk.getZ() == chunkInRegion.getZ())
+				{
+					// Generate a region id based on the center block
+					int regionId = region.getCenter().getBlockX() + region.getCenter().getBlockY() + region.getCenter().getBlockZ();
+					// Cache the region for faster all round checks
+					BiomeProtect.getRegionCache().add(regionId, region);					
+				}
+			}
 		}
 	}
 	
@@ -134,9 +177,16 @@ public class PlayerListener implements Listener {
 	 * @param player
 	 * @param region
 	 */
-	public void playerEnteredRegion(Player player, ProtectedRegion region, PlayerMoveEvent evt)
+	public void playerEnteredRegion(Player player, ProtectedRegion region,  PlayerMoveEvent evt)
 	{
-		evt.getPlayer().sendMessage("You have entered a region");
+		if(region.hasWelcomeMessage())
+		{
+			OfflinePlayer owner = Bukkit.getPlayer(region.getOwner());
+			if(region.hasWelcomeMessage())
+			{
+				evt.getPlayer().sendMessage(region.getWelcomeMessage().replaceAll("%player%", owner.getName()) + " id " + region.getId());
+			}
+		}
 	}
 	
 	/**
@@ -148,7 +198,31 @@ public class PlayerListener implements Listener {
 	 */
 	public void playerExitedRegion(Player player, ProtectedRegion region, PlayerMoveEvent evt)
 	{
-		evt.getPlayer().sendMessage("You have left a region");
+		if(region.hasLeaveMessage())
+		{
+			OfflinePlayer owner = Bukkit.getPlayer(region.getOwner());
+			String leaveMessage = region.getLeaveMessage();
+			leaveMessage = leaveMessage.replaceAll("%player%", owner.getName());
+			evt.getPlayer().sendMessage(leaveMessage + " id " + region.getId());
+		}
+	}
+	
+	public void playerJoinEvent(PlayerJoinEvent evt)
+	{
+		Player player = evt.getPlayer();
+		Chunk pChunk = evt.getPlayer().getLocation().getChunk();
+		// Cache the region if the player enters in on it
+		for(ProtectedRegion region : BiomeProtect.getRegionList().getAll())
+		{
+			for(Chunk chunkInRegion : region.getExistingChunks())
+			{
+				if(chunkInRegion.getX() == pChunk.getX() && chunkInRegion.getZ() == pChunk.getZ())
+				{
+					BiomeProtect.getRegionCache().add(region.getId(), region);
+					break;
+				}
+			}
+		}
 	}
 	
 }

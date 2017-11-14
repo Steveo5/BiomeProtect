@@ -167,4 +167,9 @@ public class RegionSettings {
 		}	
 		return null;
 	}
+	
+	public static int getInteractLimit()
+	{
+		return BiomeProtect.getRegionConfig().getInt("interact-limit");
+	}
 }
