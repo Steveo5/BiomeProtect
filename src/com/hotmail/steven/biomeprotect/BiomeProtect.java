@@ -17,17 +17,19 @@ public class BiomeProtect extends JavaPlugin {
 	private static RegionData regionData;
 	private static BiomeProtect plugin;
 	private static RegionCache regionCache;
+	private static RegionMenu menu;
 
 	@Override
 	public void onEnable()
 	{
 		regionData = new RegionData(this);
 		regions = new ProtectedRegionList<ProtectedRegion>();
+		menu = new RegionMenu();
 		// Save default config if needed
 		this.saveDefaultConfig();
 		// Register player listener
 		getServer().getPluginManager().registerEvents(new PlayerListener(), this);
-		getServer().getPluginManager().registerEvents(new RegionMenu(), this);
+		getServer().getPluginManager().registerEvents(menu, this);
 		this.getCommand("biomeprotect").setExecutor(new CommandHandler());
 		
 		plugin = this;
@@ -72,6 +74,11 @@ public class BiomeProtect extends JavaPlugin {
 	public static RegionCache getRegionCache()
 	{
 		return regionCache;
+	}
+	
+	public static RegionMenu getMenu()
+	{
+		return menu;
 	}
 	
 	/**
