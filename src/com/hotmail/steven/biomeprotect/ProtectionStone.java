@@ -21,6 +21,8 @@ public class ProtectionStone {
 	private List<String> lore;
 	private String name;
 	private boolean preventPvp = false;
+	private boolean preventTnt = false;
+	private int priority = 0;
 	
 	public ProtectionStone(String name, Material type, int data, int radius)
 	{
@@ -76,6 +78,21 @@ public class ProtectionStone {
 		this.lore = lore;
 	}
 	
+	public void setAllowsTnt(boolean allow)
+	{
+		this.preventTnt = allow;
+	}
+	
+	public void setPriority(int priority)
+	{
+		this.priority = priority;
+	}
+	
+	public int getPriority()
+	{
+		return priority;
+	}
+	
 	public boolean allowsBreak()
 	{
 		return preventBreak;
@@ -84,6 +101,11 @@ public class ProtectionStone {
 	public boolean allowsPlace()
 	{
 		return preventPlace;
+	}
+	
+	public boolean allowsTnt()
+	{
+		return preventTnt;
 	}
 	
 	public boolean allowsPvp()

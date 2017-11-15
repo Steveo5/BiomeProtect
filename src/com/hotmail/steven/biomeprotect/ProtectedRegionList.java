@@ -75,6 +75,25 @@ public class ProtectedRegionList<E> {
     	return intercepting;
     }
     
+    public List<ProtectedRegion> intercepts(ProtectedRegion region)
+    {
+    	List<ProtectedRegion> intercepting = new ArrayList<ProtectedRegion>();
+    	RegionCache cache = BiomeProtect.getRegionCache();
+    	// Brute force for now
+    	for(ProtectedRegion cachedRegion : cache.getCache().values())
+    	{
+    		// Check if the cache regions larger and smaller points overlap the 
+    		if(LocationUtil.boxContains(region.getSmallerPoint(), region.getLargerPoint(), cachedRegion.getSmallerPoint())
+    				|| LocationUtil.boxContains(region.getSmallerPoint(), region.getLargerPoint(), cachedRegion.getLargerPoint())
+    				|| LocationUtil.boxContains(cachedRegion.getSmallerPoint(), cachedRegion.getLargerPoint(), region.getSmallerPoint())
+    				|| LocationUtil.boxContains(cachedRegion.getSmallerPoint(), cachedRegion.getLargerPoint(), region.getLargerPoint()))
+    		{
+    			intercepting.add(cachedRegion);
+    		}
+    	}
+    	return intercepting;
+    }
+    
 
     private void ensureCapa() {
         int newSize = elements.length * 2;

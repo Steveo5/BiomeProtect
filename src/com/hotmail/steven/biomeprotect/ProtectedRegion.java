@@ -33,8 +33,8 @@ public class ProtectedRegion extends ProtectionStone {
 		playersInRegion = new HashSet<Player>();
 		this.owner = owner;
 		this.center = center;
-		Location p1 = this.center.clone().subtract(base.getRadius(), base.getRadius(), base.getRadius());
-		Location p2 = this.center.clone().add(base.getRadius(), base.getRadius(), base.getRadius());
+		Location p1 = this.center.clone().subtract(base.getRadius(), base.getCustomHeight() == -1 ? base.getRadius() : base.getCustomHeight(), base.getRadius());
+		Location p2 = this.center.clone().add(base.getRadius(), base.getCustomHeight() == -1 ? base.getRadius() : base.getCustomHeight(), base.getRadius());
 		// Set the smaller and larger points
 		int p1X = p1.getBlockX() < p2.getBlockX() ? p1.getBlockX() : p2.getBlockX();
 		int p1Y = p1.getBlockY() < p2.getBlockY() ? p1.getBlockY() : p2.getBlockY();
@@ -53,6 +53,9 @@ public class ProtectedRegion extends ProtectionStone {
 		if(base.hasLeaveMessage()) setLeaveMessage(base.getLeaveMessage());
 		setAllowsBreak(base.allowsBreak());
 		setAllowsPlace(base.allowsPlace());
+		if(base.getCustomHeight() != -1) this.setCustomHeight(base.getCustomHeight());
+		setAllowsPvp(base.allowsPvp());
+		setAllowsTnt(base.allowsTnt());
 		// Get existing chunks this region resides
 		chunks = LocationUtil.getAllChunks(point1, point2);
 		Logger.Log(Level.INFO, Bukkit.getOfflinePlayer(owner).getName() + " placed a field at " + center.getBlockX() + " " + center.getBlockY() + " " + center.getBlockZ());

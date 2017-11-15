@@ -118,12 +118,24 @@ public class BiomeProtect extends JavaPlugin {
 
 	/**
 	 * Find all regions that intercept a location
+	 * Orders by region priority
 	 * @param block
 	 * @return
 	 */
 	public static List<ProtectedRegion> findRegions(Location loc)
 	{
 		return regions.intercepts(loc);
+	}
+	
+	/**
+	 * Find all regions intercepting another region
+	 * Orders by region priority
+	 * @param region
+	 * @return
+	 */
+	public static List<ProtectedRegion> findOverlappingRegions(ProtectedRegion region)
+	{
+		return regions.intercepts(region);
 	}
 	
 	/**

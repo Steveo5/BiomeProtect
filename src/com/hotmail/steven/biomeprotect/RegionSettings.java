@@ -79,6 +79,8 @@ public class RegionSettings {
 			if(configSection.contains("welcome-message")) protectionStone.setWelcomeMessage(configSection.getString("welcome-message"));
 			if(configSection.contains("leave-message")) protectionStone.setLeaveMessage(configSection.getString("leave-message"));
 			if(configSection.isList("meta.lore")) protectionStone.setLore(configSection.getStringList("meta.lore"));
+			if(configSection.contains("prevent-tnt")) protectionStone.setAllowsTnt(configSection.getBoolean("prevent-tnt"));
+			if(configSection.contains("prevent-pvp")) protectionStone.setAllowsPvp(configSection.getBoolean("prevent-pvp"));
 			protectionStones.add(protectionStone);
 			System.out.println("Loaded " + protectionStone.getTitle());
 			loaded++;

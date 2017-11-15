@@ -15,6 +15,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -75,10 +76,36 @@ public class PlayerListener implements Listener {
 				BiomeProtect.getRegionCache().add(region.getId(), region);
 				evt.getPlayer().sendMessage("You have placed " + region.getName());
 				BiomeProtect.getRegionData().saveRegion(region, true);
+				
+				List<ProtectedRegion> intercepting = BiomeProtect.findOverlappingRegions(region);
+				player.sendMessage("Total intercepting " + intercepting.size());
+				for(ProtectedRegion interceptingRegion : intercepting)
+				{
+					player.sendMessage("- " + interceptingRegion.getId());
+				}
 			}
 		} else
 		{
 			tl(player, "noPlacePermission");
+		}
+	}
+	
+	@EventHandler
+	public void onPlayerPvp(EntityDamageByEntityEvent evt)
+	{
+		if(evt.getDamager() instanceof Player && evt.getEntity() instanceof Player)
+		{
+			Player damager = (Player)evt.getDamager();
+			// Check if the damaged player is in a region that does't allow pvp
+			List<ProtectedRegion> playerRegions = BiomeProtect.findRegions(damager.getLocation());
+			for(ProtectedRegion region : playerRegions)
+			{
+				if(!region.allowsPvp())
+				{
+					damager.sendMessage("You're in a region that doesn't allow pvp");
+					evt.setCancelled(true);
+				}
+			}
 		}
 	}
 	
