@@ -21,9 +21,9 @@ public class LocationUtil {
      */
     public static boolean boxContains(Location smaller, Location larger, Location search)
     {
-    	if(search.getBlockX() > smaller.getBlockX() && search.getBlockY() > smaller.getBlockY() && search.getBlockZ() > smaller.getBlockZ())
+    	if(search.getBlockX() >= smaller.getBlockX() && search.getBlockY() >= smaller.getBlockY() && search.getBlockZ() >= smaller.getBlockZ())
     	{
-    		if(search.getBlockX() < larger.getBlockX() && search.getBlockY() < larger.getBlockY() && search.getBlockZ() < larger.getBlockZ())
+    		if(search.getBlockX() <= larger.getBlockX() && search.getBlockY() <= larger.getBlockY() && search.getBlockZ() <= larger.getBlockZ())
     		{
     			return true;
     		}
