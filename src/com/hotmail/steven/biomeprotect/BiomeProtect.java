@@ -140,7 +140,7 @@ public class BiomeProtect extends JavaPlugin {
 	 * @param region
 	 * @return
 	 */
-	public static List<ProtectedRegion> findOverlappingRegions(ProtectedRegion region)
+	public static List<ProtectedRegion> findInterceptingRegions(ProtectedRegion region)
 	{
 		return regions.intercepts(region);
 	}

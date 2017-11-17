@@ -84,13 +84,7 @@ public class ProtectedRegionList<E> {
     	{
     		if(cachedRegion.getId() == region.getId()) continue;
     		// Check if the cache regions larger and smaller points overlap the 
-    		System.out.println("Checking " + region.getId() + " against " + cachedRegion.getId());
-    		System.out.println("Box " + region.getSmallerPoint().getBlockX() + " " + region.getSmallerPoint().getBlockY() + " " + region.getSmallerPoint().getBlockZ());
-    		System.out.println("Smaller cache " + cachedRegion.getSmallerPoint().getBlockX() + " " + cachedRegion.getSmallerPoint().getBlockY() + " " + cachedRegion.getSmallerPoint().getBlockZ());
-    		if(LocationUtil.boxContains(region.getSmallerPoint(), region.getLargerPoint(), cachedRegion.getSmallerPoint())
-    				|| LocationUtil.boxContains(region.getSmallerPoint(), region.getLargerPoint(), cachedRegion.getLargerPoint())
-    				|| LocationUtil.boxContains(cachedRegion.getSmallerPoint(), cachedRegion.getLargerPoint(), region.getSmallerPoint())
-    				|| LocationUtil.boxContains(cachedRegion.getSmallerPoint(), cachedRegion.getLargerPoint(), region.getLargerPoint()))
+    		if(cachedRegion.isIntercepting(region))
     		{
     			intercepting.add(cachedRegion);
     		}

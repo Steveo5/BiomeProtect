@@ -112,6 +112,21 @@ public class ProtectedRegion extends ProtectionStone {
 		return LocationUtil.boxContains(getSmallerPoint(), getLargerPoint(), loc);
 	}
 	
+	public boolean isIntercepting(ProtectedRegion region)
+	{
+		if(isLocationInside(region.getSmallerPoint()) || isLocationInside(region.getLargerPoint()))
+		{
+			return true;
+		}
+		
+		if(region.isLocationInside(getSmallerPoint()) || region.isLocationInside(getLargerPoint()))
+		{
+			return true;
+		}
+		
+		return false;
+	}
+	
 	public int getId()
 	{
 		return id;

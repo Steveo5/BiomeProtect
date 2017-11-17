@@ -77,7 +77,7 @@ public class PlayerListener implements Listener {
 				evt.getPlayer().sendMessage("You have placed " + region.getName());
 				BiomeProtect.getRegionData().saveRegion(region, true);
 				
-				List<ProtectedRegion> intercepting = BiomeProtect.findOverlappingRegions(region);
+				List<ProtectedRegion> intercepting = BiomeProtect.findInterceptingRegions(region);
 				player.sendMessage("Total intercepting " + intercepting.size());
 				for(ProtectedRegion interceptingRegion : intercepting)
 				{
