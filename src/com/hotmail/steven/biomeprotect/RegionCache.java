@@ -2,11 +2,12 @@ package com.hotmail.steven.biomeprotect;
 
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public class RegionCache {
 
-	private HashMap<Integer, ProtectedRegion> cachedRegions;
+	private HashMap<UUID, ProtectedRegion> cachedRegions;
 	
 	/**
 	 * For faster handling of regions finding any
@@ -17,37 +18,37 @@ public class RegionCache {
 	 */
 	public RegionCache()
 	{
-		cachedRegions = new HashMap<Integer, ProtectedRegion>();
+		cachedRegions = new HashMap<UUID, ProtectedRegion>();
 	}
 	
-	public void add(int id, ProtectedRegion region)
+	public void add(ProtectedRegion region)
 	{
-		cachedRegions.put(id, region);
+		cachedRegions.put(region.getId(), region);
 	}
 	
 	/**
 	 * Cache a bunch of regions
 	 * @param regions
 	 */
-	public void addAll(HashMap<Integer, ProtectedRegion> regions)
+	public void addAll(HashMap<UUID, ProtectedRegion> regions)
 	{
-		for(Entry<Integer, ProtectedRegion> region : regions.entrySet())
+		for(Entry<UUID, ProtectedRegion> region : regions.entrySet())
 		{
 			cachedRegions.put(region.getKey(), region.getValue());
 		}
 	}
 	
-	public boolean isCached(int id)
+	public boolean isCached(UUID id)
 	{
 		return cachedRegions.containsKey(id);
 	}
 	
-	public HashMap<Integer, ProtectedRegion> getCache()
+	public HashMap<UUID, ProtectedRegion> getCache()
 	{
 		return cachedRegions;
 	}
 	
-	public ProtectedRegion getCachedRegion(int id)
+	public ProtectedRegion getCachedRegion(UUID id)
 	{
 		return cachedRegions.get(id);
 	}

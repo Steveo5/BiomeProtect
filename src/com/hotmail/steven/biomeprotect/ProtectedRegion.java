@@ -23,7 +23,7 @@ public class ProtectedRegion extends ProtectionStone {
 	private UUID owner;
 	private List<Block> shownBlocks;
 	private HashSet<Chunk> chunks;
-	private int id;
+	private UUID id;
 	private HashSet<Player> playersInRegion;
 
 	public ProtectedRegion(ProtectionStone base, UUID owner, Location center)
@@ -47,7 +47,6 @@ public class ProtectedRegion extends ProtectionStone {
 		point1 = new Location(p1.getWorld(), p1X, p1Y, p1Z);
 		point2 = new Location(p2.getWorld(), p2X, p2Y, p2Z);
 		// Generate id based on 3d to 1d
-		id = center.getBlockX() + center.getBlockY() + center.getBlockZ();
 		// Copy the flags over
 		if(base.hasWelcomeMessage()) setWelcomeMessage(base.getWelcomeMessage());
 		if(base.hasLeaveMessage()) setLeaveMessage(base.getLeaveMessage());
@@ -62,6 +61,11 @@ public class ProtectedRegion extends ProtectionStone {
 		Logger.Log(Level.INFO, "Region intercepts " + chunks.size() + " chunks");
 		Logger.Log(Level.INFO, "Min location " + point1.getBlockX() + " " + point1.getBlockY() + " " + point1.getBlockZ());
 		Logger.Log(Level.INFO, "Max location " + point2.getBlockX() + " " + point2.getBlockY() + " " + point2.getBlockZ());
+	}
+	
+	protected void setUUID(UUID id)
+	{
+		this.id = id;
 	}
 	
 	/**
@@ -114,20 +118,29 @@ public class ProtectedRegion extends ProtectionStone {
 	
 	public boolean isIntercepting(ProtectedRegion region)
 	{
-		if(isLocationInside(region.getSmallerPoint()) || isLocationInside(region.getLargerPoint()))
-		{
-			return true;
-		}
+		if(!region.getSmallerPoint().getWorld().getUID().equals(this.getSmallerPoint().getWorld().getUID())) return false;
 		
-		if(region.isLocationInside(getSmallerPoint()) || region.isLocationInside(getLargerPoint()))
+		// Compare chunks first so the distance check isn't too far
+		for(Chunk c : getExistingChunks())
 		{
-			return true;
+			for(Chunk compare : region.getExistingChunks())
+			{
+				if(c.getX() == compare.getX() && c.getZ() == compare.getZ())
+				{
+					Location compareCenter = region.getCenter();
+					Location center = getCenter();
+					
+					double distance = Math.round(compareCenter.distance(center));
+					System.out.println("Distance from " + region.getId() + " " + distance);
+					if(distance <= getRadius() + region.getRadius()) return true;
+				}
+			}
 		}
 		
 		return false;
 	}
 	
-	public int getId()
+	public UUID getId()
 	{
 		return id;
 	}

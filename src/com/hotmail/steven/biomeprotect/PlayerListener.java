@@ -72,8 +72,10 @@ public class PlayerListener implements Listener {
 				System.out.println(protectionStone.getWelcomeMessage());
 				// Create the protected region physically
 				ProtectedRegion region = BiomeProtect.defineRegion(protectionStone, evt.getPlayer(), blockLocation);
+				UUID newId = UUID.randomUUID();
+				region.setUUID(newId);
 				// Cache the region
-				BiomeProtect.getRegionCache().add(region.getId(), region);
+				BiomeProtect.getRegionCache().add(region);
 				evt.getPlayer().sendMessage("You have placed " + region.getName());
 				BiomeProtect.getRegionData().saveRegion(region, true);
 				
@@ -193,7 +195,7 @@ public class PlayerListener implements Listener {
 					// Generate a region id based on the center block
 					int regionId = region.getCenter().getBlockX() + region.getCenter().getBlockY() + region.getCenter().getBlockZ();
 					// Cache the region for faster all round checks
-					BiomeProtect.getRegionCache().add(regionId, region);					
+					BiomeProtect.getRegionCache().add(region);					
 				}
 			}
 		}
@@ -245,7 +247,7 @@ public class PlayerListener implements Listener {
 			{
 				if(chunkInRegion.getX() == pChunk.getX() && chunkInRegion.getZ() == pChunk.getZ())
 				{
-					BiomeProtect.getRegionCache().add(region.getId(), region);
+					BiomeProtect.getRegionCache().add(region);
 					break;
 				}
 			}

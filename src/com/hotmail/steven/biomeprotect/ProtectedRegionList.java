@@ -82,7 +82,7 @@ public class ProtectedRegionList<E> {
     	// Brute force for now
     	for(ProtectedRegion cachedRegion : cache.getCache().values())
     	{
-    		if(cachedRegion.getId() == region.getId()) continue;
+    		if(cachedRegion.getId().equals(region.getId())) continue;
     		// Check if the cache regions larger and smaller points overlap the 
     		if(cachedRegion.isIntercepting(region))
     		{

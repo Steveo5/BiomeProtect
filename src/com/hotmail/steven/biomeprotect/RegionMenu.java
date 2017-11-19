@@ -23,12 +23,12 @@ import com.hotmail.steven.util.StringUtil;
 
 public class RegionMenu implements Listener {
 
-	private HashMap<UUID, Integer> inventories;
+	private HashMap<UUID, UUID> inventories;
 	private HashMap<UUID, Integer> inputWaiting;
 	
 	public RegionMenu()
 	{
-		inventories = new HashMap<UUID, Integer>();
+		inventories = new HashMap<UUID, UUID>();
 		inputWaiting = new HashMap<UUID, Integer>();
 	}
 	

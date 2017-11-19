@@ -75,7 +75,7 @@ public class RegionData {
 	private void createRegionTable(Statement stmt)
 	{
 		try {
-			stmt.execute("CREATE TABLE IF NOT EXISTS cuboids (cuboid_id INT(6) PRIMARY KEY NOT NULL,"
+			stmt.execute("CREATE TABLE IF NOT EXISTS cuboids (cuboid_id VARCHAR(60) PRIMARY KEY NOT NULL,"
 					+ " owner VARCHAR(60) NOT NULL,"
 					+ " x INT(6) NOT NULL,"
 					+ " y INT (6) NOT NULL,"
@@ -121,7 +121,7 @@ public class RegionData {
 	{
 		try
 		{
-			stmt.execute("CREATE TABLE IF NOT EXISTS cuboid_flags (cuboid_id INT(6),"
+			stmt.execute("CREATE TABLE IF NOT EXISTS cuboid_flags (cuboid_id VARCHAR(60),"
 					+ " FOREIGN KEY (cuboid_id) REFERENCES cuboids(cuboid_id),"
 					+ " flag_id INT(6),"
 					+ " FOREIGN KEY (flag_id) REFERENCES flags(flag_id),"
@@ -142,7 +142,7 @@ public class RegionData {
 		{
 			stmt.execute("CREATE TABLE IF NOT EXISTS players (builder_id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
 					+ " uuid VARCHAR(40),"
-					+ " cuboid_id INT(6),"
+					+ " cuboid_id VARCHAR(60),"
 					+ " FOREIGN KEY (cuboid_id) REFERENCES cuboids(cuboid_id))");
 			stmt.close();
 		} catch(SQLException e)
@@ -161,7 +161,7 @@ public class RegionData {
 				ResultSet rs = stmt.executeQuery("SELECT * FROM cuboids");
 				while(rs.next())
 				{
-					int id = rs.getInt(1);
+					UUID id = UUID.fromString(rs.getString(1));
 					Logger.Log(Level.INFO, "Loading cuboid " + id);
 					UUID owner = UUID.fromString(rs.getString(2));
 					int x = rs.getInt(3);
@@ -178,7 +178,7 @@ public class RegionData {
 					Statement flagStatement = connection.createStatement();
 					for(int i=1;i<6;i++)
 					{
-						ResultSet flag = flagStatement.executeQuery("SELECT * FROM cuboid_flags WHERE (cuboid_id,flag_id)=(" + id + "," + i + ")");
+						ResultSet flag = flagStatement.executeQuery("SELECT * FROM cuboid_flags WHERE (cuboid_id,flag_id)=('" + id.toString() + "'," + i + ")");
 						if(flag.next())
 						{
 							switch(i)
@@ -203,7 +203,8 @@ public class RegionData {
 						}
 					}
 					
-					BiomeProtect.defineRegion(settings, owner, new Location(w, x, y, z));
+					ProtectedRegion region = BiomeProtect.defineRegion(settings, owner, new Location(w, x, y, z));
+					region.setUUID(id);
 
 				}
 			} catch(SQLException e)
@@ -254,7 +255,7 @@ public class RegionData {
 		int y = region.getCenter().getBlockY();
 		int z = region.getCenter().getBlockZ();
 		UUID world = region.getSmallerPoint().getWorld().getUID();
-		int id = region.getId();
+		UUID id = region.getId();
 		
 		String name = region.getName();
 		String mat = region.getMaterial().name();
@@ -263,32 +264,34 @@ public class RegionData {
 		try
 		{
 			Statement stmt = connection.createStatement();
+			System.out.println("Inserting region data for " + region.getId());
 			if(create)
 			{
 				stmt.execute("REPLACE INTO cuboids (cuboid_id,owner,x,y,z,world,name,material,data,radius) "
-						+ "VALUES(" + id + ",'" + owner.toString() + "'," + x + "," + y + "," + z
+						+ "VALUES('" + id.toString() + "','" + owner.toString() + "'," + x + "," + y + "," + z
 						+ ",'" + world.toString() + "','" + name + "','" + mat + "'," + data + "," + radius + ")");
+				
+				if(region.hasWelcomeMessage())
+				{
+					stmt.execute("REPLACE INTO cuboid_flags(cuboid_id,flag_id,value,enabled) VALUES('" + region.getId()
+					+ "',2,'" + region.getWelcomeMessage() + "',1)");
+				}
+				
+				if(region.hasLeaveMessage())
+				{
+					stmt.execute("REPLACE INTO cuboid_flags(cuboid_id,flag_id,value,enabled) VALUES('" + region.getId()
+					+ "',3,'" + region.getLeaveMessage() + "',1)");
+				}
+				
+				stmt.execute("REPLACE INTO cuboid_flags(cuboid_id,flag_id,value,enabled) VALUES('" + region.getId()
+				+ "',5,'" + region.allowsBreak() + "',1)");
+				
+				stmt.execute("REPLACE INTO cuboid_flags(cuboid_id,flag_id,value,enabled) VALUES('" + region.getId()
+				+ "',6,'" + region.allowsPlace() + "',1)");
 			} else
 			{
 				//TODO update code
 			}
-			if(region.hasWelcomeMessage())
-			{
-				stmt.execute("REPLACE INTO cuboid_flags(cuboid_id,flag_id,value,enabled) VALUES(" + region.getId()
-				+ ",2,'" + region.getWelcomeMessage() + "',1)");
-			}
-			
-			if(region.hasLeaveMessage())
-			{
-				stmt.execute("REPLACE INTO cuboid_flags(cuboid_id,flag_id,value,enabled) VALUES(" + region.getId()
-				+ ",3,'" + region.getLeaveMessage() + "',1)");
-			}
-			
-			stmt.execute("REPLACE INTO cuboid_flags(cuboid_id,flag_id,value,enabled) VALUES(" + region.getId()
-			+ ",5,'" + region.allowsBreak() + "',1)");
-			
-			stmt.execute("REPLACE INTO cuboid_flags(cuboid_id,flag_id,value,enabled) VALUES(" + region.getId()
-			+ ",6,'" + region.allowsPlace() + "',1)");
 			//stmt.execute("REPLACE INTO cuboid_flags(flag_id,value,enabled) VALUES("")
 			stmt.close();
 		} catch(SQLException e)
@@ -301,7 +304,7 @@ public class RegionData {
 	 * Remove a region from the database
 	 * @param id
 	 */
-	public void removeRegion(int id)
+	public void removeRegion(UUID id)
 	{
 		try
 		{
@@ -309,10 +312,10 @@ public class RegionData {
 			// Remove the flags
 			for(int i=1;i<7;i++)
 			{
-				stmt.execute("DELETE FROM cuboid_flags WHERE (cuboid_id,flag_id) = (" + id + "," + i + ")");
+				stmt.execute("DELETE FROM cuboid_flags WHERE (cuboid_id,flag_id) = ('" + id.toString() + "'," + i + ")");
 			}
 			
-			stmt.execute("DELETE FROM cuboids WHERE cuboid_id=" + id);
+			stmt.execute("DELETE FROM cuboids WHERE cuboid_id='" + id + "'");
 			stmt.close();
 		} catch(SQLException e)
 		{

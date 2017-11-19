@@ -186,7 +186,7 @@ public class BiomeProtect extends JavaPlugin {
 		return findRegionExact(block.getLocation());
 	}
 	
-	public static ProtectedRegion getRegion(int id)
+	public static ProtectedRegion getRegion(UUID id)
 	{
 		return getRegionCache().getCachedRegion(id);
 	}
