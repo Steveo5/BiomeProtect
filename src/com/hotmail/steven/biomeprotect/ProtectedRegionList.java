@@ -92,6 +92,16 @@ public class ProtectedRegionList<E> {
     	return intercepting;
     }
     
+    /**
+     * Gets the highest priority region in a list of regions
+     * @param regionList
+     * @return
+     */
+    public ProtectedRegion getHighestPriority(List<ProtectedRegion> regionList)
+    {
+    	
+    }
+    
 
     private void ensureCapa() {
         int newSize = elements.length * 2;

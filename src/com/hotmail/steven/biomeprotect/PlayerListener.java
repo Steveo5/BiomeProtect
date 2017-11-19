@@ -50,6 +50,7 @@ public class PlayerListener implements Listener {
 				if(region != null)
 				{
 					BiomeProtect.getMenu().show(evt.getPlayer(), region);
+					evt.setCancelled(true);
 				}
 				interactLimit.put(p.getUniqueId(), System.currentTimeMillis());
 			}
