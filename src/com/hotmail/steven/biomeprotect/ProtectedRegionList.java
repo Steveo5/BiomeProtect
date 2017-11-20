@@ -99,7 +99,15 @@ public class ProtectedRegionList<E> {
      */
     public ProtectedRegion getHighestPriority(List<ProtectedRegion> regionList)
     {
+    	if(regionList.size() < 1) return null;
     	
+    	ProtectedRegion highestPriority = regionList.get(0);   	
+    	for(ProtectedRegion region : regionList)
+    	{
+    		if(region.getPriority() > highestPriority.getPriority()) highestPriority = region;
+    	}
+    	
+    	return highestPriority;
     }
     
 

@@ -49,7 +49,13 @@ public class PlayerListener implements Listener {
 				ProtectedRegion region = BiomeProtect.findRegionExact(evt.getClickedBlock());
 				if(region != null)
 				{
-					BiomeProtect.getMenu().show(evt.getPlayer(), region);
+					if(!region.isOwner(p.getUniqueId()))
+					{
+						p.sendMessage("You have no permission to access this players region");
+					} else
+					{
+						BiomeProtect.getMenu().show(evt.getPlayer(), region);
+					}
 					evt.setCancelled(true);
 				}
 				interactLimit.put(p.getUniqueId(), System.currentTimeMillis());
@@ -75,12 +81,14 @@ public class PlayerListener implements Listener {
 				ProtectedRegion region = BiomeProtect.defineRegion(protectionStone, evt.getPlayer(), blockLocation);
 				UUID newId = UUID.randomUUID();
 				region.setUUID(newId);
+				region.setPriority(BiomeProtect.getRegionList().getHighestPriority(BiomeProtect.findInterceptingRegions(region)).getPriority() + 1);
 				// Cache the region
 				BiomeProtect.getRegionCache().add(region);
 				evt.getPlayer().sendMessage("You have placed " + region.getName());
 				BiomeProtect.getRegionData().saveRegion(region, true);
 				
 				List<ProtectedRegion> intercepting = BiomeProtect.findInterceptingRegions(region);
+				player.sendMessage("Region priority " + region.getPriority());
 				player.sendMessage("Total intercepting " + intercepting.size());
 				for(ProtectedRegion interceptingRegion : intercepting)
 				{
