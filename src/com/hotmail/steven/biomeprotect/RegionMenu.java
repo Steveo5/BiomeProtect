@@ -207,7 +207,10 @@ public class RegionMenu implements Listener {
 			// The message type we are waiting for
 			int inputType = inputWaiting.get(player.getUniqueId());
 			// The region the player is managing
-			ProtectedRegion managingRegion = BiomeProtect.getRegion(inventories.get(player.getUniqueId()));
+			UUID regionId = inventories.get(player.getUniqueId());
+			System.out.println("Getting region id " + regionId);
+			final ProtectedRegion managingRegion = BiomeProtect.getRegion(regionId);
+			System.out.println("Region id " + managingRegion.getId() + " was found");
 			inputWaiting.remove(player.getUniqueId());
 			
 			switch(inputType)

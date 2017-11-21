@@ -310,7 +310,7 @@ public class ProtectedRegion extends ProtectionStone {
 	 */
 	public void addMember(UUID member)
 	{
-		members.remove(member);
+		members.add(member);
 	}
 	
 	/**
