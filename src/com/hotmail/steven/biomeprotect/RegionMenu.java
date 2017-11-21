@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,7 +20,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.hotmail.steven.util.PlayerUtil;
 import com.hotmail.steven.util.StringUtil;
+import com.mysql.fabric.xmlrpc.base.Array;
 
 public class RegionMenu implements Listener {
 
@@ -37,11 +40,13 @@ public class RegionMenu implements Listener {
 		Inventory inv = Bukkit.createInventory(null, 18, StringUtil.colorize("&c&lManage protected region"));
 		Player owner = Bukkit.getPlayer(region.getOwner());
 		
+		// Create all of the buttons
 		ItemStack btnBreak = new ItemStack(Material.LOG, 1);
 		ItemMeta btnBreakMeta = btnBreak.getItemMeta();
 		btnBreakMeta.setDisplayName(StringUtil.colorize("&aAllow break"));
 		btnBreakMeta.setLore(new ArrayList<String>(Arrays.asList(StringUtil.colorize(region.allowsBreak() ? "&cenabled" : "&cdisabled"))));
 		btnBreak.setItemMeta(btnBreakMeta);
+		
 		ItemStack btnPlace = new ItemStack(Material.LOG, 1);
 		ItemMeta btnPlaceMeta = btnBreak.getItemMeta();
 		btnPlaceMeta.setDisplayName(StringUtil.colorize("&aAllow place"));
@@ -66,11 +71,58 @@ public class RegionMenu implements Listener {
 		btnLeaveMeta.setLore(new ArrayList<String>(Arrays.asList(StringUtil.colorize(region.hasLeaveMessage() ? "&7" + region.getLeaveMessage().replaceAll("%player%", owner.getName()) : "&7none"))));
 		btnLeave.setItemMeta(btnLeaveMeta);
 		
+		ItemStack btnTnt = new ItemStack(Material.TNT, 1);
+		ItemMeta btnTntMeta = btnTnt.getItemMeta();
+		btnTntMeta.setDisplayName(StringUtil.colorize("&aAllow tnt"));
+		btnTntMeta.setLore(new ArrayList<String>(Arrays.asList(StringUtil.colorize(region.allowsTnt() ? "&cenabled" : "&cdisabled"))));
+		btnTnt.setItemMeta(btnTntMeta);
+		
+		ItemStack btnShow = new ItemStack(Material.GLASS, 1);
+		ItemMeta btnShowMeta = btnShow.getItemMeta();
+		btnShowMeta.setDisplayName(StringUtil.colorize("&aShow protection"));
+		btnShowMeta.setLore(new ArrayList<String>(Arrays.asList(StringUtil.colorize("&cDisplay the protected region"))));
+		btnShow.setItemMeta(btnShowMeta);
+		
+		ItemStack btnDisable = new ItemStack(Material.BARRIER, 1);
+		ItemMeta btnDisableMeta = btnDisable.getItemMeta();
+		btnDisableMeta.setDisplayName(StringUtil.colorize("&aToggle protection"));
+		btnDisableMeta.setLore(new ArrayList<String>(Arrays.asList(StringUtil.colorize("&cenabled"))));
+		btnDisable.setItemMeta(btnDisableMeta);
+		
+		ItemStack btnPreventEntry = new ItemStack(Material.ACACIA_DOOR_ITEM, 1);
+		ItemMeta btnPreventEntryMeta = btnPreventEntry.getItemMeta();
+		btnPreventEntryMeta.setDisplayName(StringUtil.colorize("&aEnable entry"));
+		btnPreventEntryMeta.setLore(new ArrayList<String>(Arrays.asList(StringUtil.colorize("&cenabled"))));
+		btnPreventEntry.setItemMeta(btnPreventEntryMeta);
+		
+		ItemStack btnListMembers = new ItemStack(Material.SKULL_ITEM, 1);
+		ItemMeta btnListMembersMeta = btnListMembers.getItemMeta();
+		btnListMembersMeta.setDisplayName(StringUtil.colorize("&aList members"));
+		btnListMembers.setItemMeta(btnListMembersMeta);
+		
+		ItemStack btnAddMember = new ItemStack(Material.SKULL_ITEM, 1);
+		ItemMeta btnAddMemberMeta = btnAddMember.getItemMeta();
+		btnAddMemberMeta.setDisplayName(StringUtil.colorize("&aAdd member"));
+		btnAddMember.setItemMeta(btnAddMemberMeta);
+		
+		ItemStack btnRemoveMember = new ItemStack(Material.SKULL_ITEM, 1);
+		ItemMeta btnRemoveMemberMeta = btnRemoveMember.getItemMeta();
+		btnRemoveMemberMeta.setDisplayName(StringUtil.colorize("&aRemove member"));
+		btnRemoveMember.setItemMeta(btnRemoveMemberMeta);
+		
+		// Add buttons to the inventory
 		inv.setItem(0, btnBreak);
 		inv.setItem(1, btnPlace);
 		inv.setItem(2, btnPvp);
 		inv.setItem(3, btnEntry);
 		inv.setItem(4, btnLeave);
+		inv.setItem(5, btnTnt);
+		inv.setItem(6, btnShow);
+		inv.setItem(7, btnDisable);
+		inv.setItem(8, btnPreventEntry);
+		inv.setItem(9, btnListMembers);
+		inv.setItem(10, btnAddMember);
+		inv.setItem(11, btnRemoveMember);
 		
 		inventories.put(player.getUniqueId(), region.getId());
 		player.openInventory(inv);
@@ -111,6 +163,34 @@ public class RegionMenu implements Listener {
 					inputWaiting.put(player.getUniqueId(), 4);
 					player.sendMessage("Please enter a message (type none to disable):");
 					player.closeInventory();
+					break;
+				case 5:
+					managingRegion.setAllowsTnt(!managingRegion.allowsTnt());
+					show(player, managingRegion);
+					break;
+				case 6:
+					managingRegion.show();
+					player.closeInventory();
+					break;
+				case 7:
+					break;
+				case 8:
+					break;
+				case 9:
+					System.out.println("Member size " + managingRegion.getMembers().size());
+					player.sendMessage(StringUtil.paginateArray(PlayerUtil.playersAsNames(PlayerUtil.uuidListAsPlayers(managingRegion.getMembers())).toArray(), 12, 1));
+					player.closeInventory();
+					break;
+				case 10:
+					inputWaiting.put(player.getUniqueId(), 10);
+					player.sendMessage("Please enter a players name:");
+					player.closeInventory();
+					break;
+				case 11:
+					inputWaiting.put(player.getUniqueId(), 11);
+					player.sendMessage("Please enter a players name:");
+					player.closeInventory();
+					break;
 				}
 				
 				inventories.put(player.getUniqueId(), managingRegion.getId());
@@ -139,6 +219,28 @@ public class RegionMenu implements Listener {
 			case 4:
 				managingRegion.setLeaveMessage(evt.getMessage());
 				player.sendMessage("Welcome message updated");
+				break;
+			case 10:
+				OfflinePlayer member = Bukkit.getPlayer(evt.getMessage());
+				if(member == null)
+				{
+					player.sendMessage("Player doesn't exist");
+				} else
+				{
+					managingRegion.addMember(member.getUniqueId());
+					player.sendMessage("Player added to the member list");
+				}
+				break;
+			case 11:
+				OfflinePlayer deletingMember = Bukkit.getPlayer(evt.getMessage());
+				if(deletingMember == null || !managingRegion.hasMember(deletingMember.getUniqueId()))
+				{
+					player.sendMessage("Player doesn't exist in the member list");
+				} else
+				{
+					managingRegion.removeMember(deletingMember.getUniqueId());
+					player.sendMessage("Player removed from the member list");
+				}
 				break;
 			}
 			

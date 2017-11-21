@@ -156,6 +156,17 @@ public class BiomeProtect extends JavaPlugin {
 	}
 	
 	/**
+	 * Finds a region at the specified block
+	 * if more then one region then the max
+	 * priority region is returned
+	 * @return
+	 */
+	public static ProtectedRegion findRegion(Block block)
+	{
+		return regions.getHighestPriority(findRegions(block));
+	}
+	
+	/**
 	 * Get the region that exists with the center block
 	 * at the first parameter
 	 * @param block

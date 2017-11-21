@@ -25,12 +25,14 @@ public class ProtectedRegion extends ProtectionStone {
 	private HashSet<Chunk> chunks;
 	private UUID id;
 	private HashSet<Player> playersInRegion;
+	private HashSet<UUID> members;
 
 	public ProtectedRegion(ProtectionStone base, UUID owner, Location center)
 	{
 		super(base.getName(), base.getMaterial(), base.getData(), base.getRadius());
 		shownBlocks = new ArrayList<Block>();
 		playersInRegion = new HashSet<Player>();
+		members = new HashSet<UUID>();
 		this.owner = owner;
 		this.center = center;
 		Location p1 = this.center.clone().subtract(base.getRadius(), base.getCustomHeight() == -1 ? base.getRadius() : base.getCustomHeight(), base.getRadius());
@@ -291,6 +293,39 @@ public class ProtectedRegion extends ProtectionStone {
 		}	
 		
 		return true;		
+	}
+	
+	/**
+	 * Get all the members who have build, pvp etc permission in the region
+	 * @return
+	 */
+	public HashSet<UUID> getMembers()
+	{
+		return members;
+	}
+	
+	/**
+	 * Add a member to this region
+	 * @param member
+	 */
+	public void addMember(UUID member)
+	{
+		members.remove(member);
+	}
+	
+	/**
+	 * Check if the region has a member
+	 * @param member
+	 * @return
+	 */
+	public boolean hasMember(UUID member)
+	{
+		return members.contains(member);
+	}
+	
+	public void removeMember(UUID member)
+	{
+		members.remove(member);
 	}
 	
 	@Override

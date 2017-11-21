@@ -81,12 +81,20 @@ public class PlayerListener implements Listener {
 				ProtectedRegion region = BiomeProtect.defineRegion(protectionStone, evt.getPlayer(), blockLocation);
 				UUID newId = UUID.randomUUID();
 				region.setUUID(newId);
-				region.setPriority(BiomeProtect.getRegionList().getHighestPriority(BiomeProtect.findInterceptingRegions(region)).getPriority() + 1);
+				// Find the intercepting regions
+				List<ProtectedRegion> interceptingRegions = BiomeProtect.findInterceptingRegions(region);
+				// Get the highest priority from the intercepting regions
+				ProtectedRegion highestPriorityRegion = BiomeProtect.getRegionList().getHighestPriority(interceptingRegions);
+				int highestPriority = highestPriorityRegion == null ? 0 : highestPriorityRegion.getPriority();
+				System.out.println(highestPriority + " highest priorty");
+				region.setPriority(highestPriority + 1);
 				// Cache the region
 				BiomeProtect.getRegionCache().add(region);
 				evt.getPlayer().sendMessage("You have placed " + region.getName());
+				// Save the region to database
 				BiomeProtect.getRegionData().saveRegion(region, true);
 				
+				// Some debug
 				List<ProtectedRegion> intercepting = BiomeProtect.findInterceptingRegions(region);
 				player.sendMessage("Region priority " + region.getPriority());
 				player.sendMessage("Total intercepting " + intercepting.size());
@@ -108,14 +116,11 @@ public class PlayerListener implements Listener {
 		{
 			Player damager = (Player)evt.getDamager();
 			// Check if the damaged player is in a region that does't allow pvp
-			List<ProtectedRegion> playerRegions = BiomeProtect.findRegions(damager.getLocation());
-			for(ProtectedRegion region : playerRegions)
+			ProtectedRegion region = BiomeProtect.findRegion(damager.getLocation().getBlock());
+			if(!region.allowsPvp())
 			{
-				if(!region.allowsPvp())
-				{
-					damager.sendMessage("You're in a region that doesn't allow pvp");
-					evt.setCancelled(true);
-				}
+				damager.sendMessage("You're in a region that doesn't allow pvp");
+				evt.setCancelled(true);
 			}
 		}
 	}

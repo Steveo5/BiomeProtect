@@ -270,28 +270,29 @@ public class RegionData {
 				stmt.execute("REPLACE INTO cuboids (cuboid_id,owner,x,y,z,world,name,material,data,radius) "
 						+ "VALUES('" + id.toString() + "','" + owner.toString() + "'," + x + "," + y + "," + z
 						+ ",'" + world.toString() + "','" + name + "','" + mat + "'," + data + "," + radius + ")");
-				
-				if(region.hasWelcomeMessage())
-				{
-					stmt.execute("REPLACE INTO cuboid_flags(cuboid_id,flag_id,value,enabled) VALUES('" + region.getId()
-					+ "',2,'" + region.getWelcomeMessage() + "',1)");
-				}
-				
-				if(region.hasLeaveMessage())
-				{
-					stmt.execute("REPLACE INTO cuboid_flags(cuboid_id,flag_id,value,enabled) VALUES('" + region.getId()
-					+ "',3,'" + region.getLeaveMessage() + "',1)");
-				}
-				
-				stmt.execute("REPLACE INTO cuboid_flags(cuboid_id,flag_id,value,enabled) VALUES('" + region.getId()
-				+ "',5,'" + region.allowsBreak() + "',1)");
-				
-				stmt.execute("REPLACE INTO cuboid_flags(cuboid_id,flag_id,value,enabled) VALUES('" + region.getId()
-				+ "',6,'" + region.allowsPlace() + "',1)");
 			} else
 			{
 				//TODO update code
 			}
+			
+			// Flags don't break the database rules, insert or replace them anyway
+			if(region.hasWelcomeMessage())
+			{
+				stmt.execute("REPLACE INTO cuboid_flags(cuboid_id,flag_id,value,enabled) VALUES('" + region.getId()
+				+ "',2,'" + region.getWelcomeMessage() + "',1)");
+			}
+			
+			if(region.hasLeaveMessage())
+			{
+				stmt.execute("REPLACE INTO cuboid_flags(cuboid_id,flag_id,value,enabled) VALUES('" + region.getId()
+				+ "',3,'" + region.getLeaveMessage() + "',1)");
+			}
+			
+			stmt.execute("REPLACE INTO cuboid_flags(cuboid_id,flag_id,value,enabled) VALUES('" + region.getId()
+			+ "',5,'" + region.allowsBreak() + "',1)");
+			
+			stmt.execute("REPLACE INTO cuboid_flags(cuboid_id,flag_id,value,enabled) VALUES('" + region.getId()
+			+ "',6,'" + region.allowsPlace() + "',1)");
 			//stmt.execute("REPLACE INTO cuboid_flags(flag_id,value,enabled) VALUES("")
 			stmt.close();
 		} catch(SQLException e)
