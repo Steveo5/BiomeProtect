@@ -21,6 +21,9 @@ public class Language {
 		} else if(obj.equals("regionDoesntExist"))
 		{
 			return "No protected regions exist here";
+		} else if(obj.equals("noPermission"))
+		{
+			return "You do not have permission to perform that action";
 		}
 		return "";
 	}

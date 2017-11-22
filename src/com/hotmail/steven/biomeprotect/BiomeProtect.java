@@ -1,9 +1,11 @@
 package com.hotmail.steven.biomeprotect;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -119,6 +121,7 @@ public class BiomeProtect extends JavaPlugin {
 	public static ProtectedRegion defineRegion(ProtectionStone settings, UUID owner, Location center)
 	{
 		ProtectedRegion region = new ProtectedRegion(settings, owner, center);
+		// Add the region to the loaded regions list
 		regions.add(region);
 		return region;		
 	}
@@ -156,6 +159,27 @@ public class BiomeProtect extends JavaPlugin {
 	}
 	
 	/**
+	 * Find all regions intercepting a chunk
+	 * @param chunk
+	 * @return
+	 */
+	public static List<ProtectedRegion> findRegions(Chunk chunk)
+	{
+		List<ProtectedRegion> intercepting = new ArrayList<ProtectedRegion>();
+		for(ProtectedRegion region : getRegionCache().getCache().values())
+		{
+			for(Chunk c : region.getExistingChunks())
+			{
+				if(c.getX() == chunk.getX() && c.getZ() == chunk.getZ())
+				{
+					intercepting.add(region);
+				}
+			}
+		}
+		return intercepting;
+	}
+	
+	/**
 	 * Finds a region at the specified block
 	 * if more then one region then the max
 	 * priority region is returned
@@ -165,7 +189,7 @@ public class BiomeProtect extends JavaPlugin {
 	{
 		return regions.getHighestPriority(findRegions(block));
 	}
-	
+
 	/**
 	 * Get the region that exists with the center block
 	 * at the first parameter

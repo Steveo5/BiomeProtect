@@ -1,6 +1,7 @@
 package com.hotmail.steven.biomeprotect;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -8,7 +9,9 @@ import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,6 +22,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+
 import static com.hotmail.steven.biomeprotect.Language.tl;
 
 public class PlayerListener implements Listener {
@@ -69,16 +74,32 @@ public class PlayerListener implements Listener {
 		// Where the block was placed
 		Location blockLocation = evt.getBlock().getLocation();
 		Player player = evt.getPlayer();
-		
-		if(ProtectedRegion.hasPlacePermission(player.getUniqueId(), blockLocation))
+		// Check if the player can perform a break action at the location
+		if(!canPerformAction(evt.getBlock(), 1, player))
 		{
-			if(RegionSettings.isProtectionStone(evt.getItemInHand()))
+			evt.setCancelled(true);
+			tl(player, "noPermission");
+		} else if(evt.getBlock().getType() == Material.TNT && !canPerformAction(evt.getBlock(), 5, player))
+		{
+			evt.setCancelled(true);
+			tl(player, "noPermission");
+			
+		// Check if the player can perform a region create action at the location
+		} else if(RegionSettings.isProtectionStone(evt.getItemInHand()))
+		{
+			// Get the flags/settings for the protection stone
+			ProtectionStone protectionStone = RegionSettings.getProtectionStone(evt.getItemInHand());
+			System.out.println("Checking reigon palce");
+			if(!canPerformRegionPlace(evt.getBlock(), player, protectionStone))
 			{
-				// Get the flags/settings for the protection stone
-				ProtectionStone protectionStone = RegionSettings.getProtectionStone(evt.getItemInHand());
+				evt.setCancelled(true);
+				tl(player, "noPermission");
+			} else
+			{
 				System.out.println(protectionStone.getWelcomeMessage());
 				// Create the protected region physically
 				ProtectedRegion region = BiomeProtect.defineRegion(protectionStone, evt.getPlayer(), blockLocation);
+				// Generate a uuid for the region
 				UUID newId = UUID.randomUUID();
 				region.setUUID(newId);
 				// Find the intercepting regions
@@ -103,9 +124,6 @@ public class PlayerListener implements Listener {
 					player.sendMessage("- " + interceptingRegion.getId());
 				}
 			}
-		} else
-		{
-			tl(player, "noPlacePermission");
 		}
 	}
 	
@@ -115,12 +133,11 @@ public class PlayerListener implements Listener {
 		if(evt.getDamager() instanceof Player && evt.getEntity() instanceof Player)
 		{
 			Player damager = (Player)evt.getDamager();
-			// Check if the damaged player is in a region that does't allow pvp
-			ProtectedRegion region = BiomeProtect.findRegion(damager.getLocation().getBlock());
-			if(!region.allowsPvp())
+			// Check if the user can perform a pvp action at the damaged players block
+			if(!canPerformAction(evt.getEntity().getLocation().getBlock(), 3, damager))
 			{
-				damager.sendMessage("You're in a region that doesn't allow pvp");
 				evt.setCancelled(true);
+				tl(damager, "noPermission");
 			}
 		}
 	}
@@ -128,23 +145,119 @@ public class PlayerListener implements Listener {
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent evt)
 	{
-		// Where the block was broken
-		Location blockLocation = evt.getBlock().getLocation();
-		Player player = evt.getPlayer();
-		if(ProtectedRegion.hasBreakPermission(player.getUniqueId(), blockLocation))
+		// Check if the user can perform a break action at the specific block
+		if(!canPerformAction(evt.getBlock(), 2, evt.getPlayer()))
 		{
-			// Check if the player is breaking the internal region
-			ProtectedRegion innerRegion = BiomeProtect.findRegionExact(blockLocation);
-			if(innerRegion != null && innerRegion.getOwner().equals(player.getUniqueId()))
-			{
-				innerRegion.remove();
-				tl(player, "regionRemoved");
-			}			
+			evt.setCancelled(true);
+			tl(evt.getPlayer(), "noPermission");
 		} else
 		{
-			tl(player, "noBreakPermission");
+			ProtectedRegion brokenRegion = BiomeProtect.findRegionExact(evt.getBlock());
+			if(brokenRegion != null)
+			{
+				Player p = evt.getPlayer();
+				// Check if the user can break the region
+				if(!p.hasPermission("biomeprotect.break") || !brokenRegion.isOwner(p.getUniqueId()))
+				{
+					tl(evt.getPlayer(), "noPermission");
+					evt.setCancelled(true);
+				} else
+				{
+					brokenRegion.remove();
+					tl(evt.getPlayer(), "regionRemoved");
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Check whether or not a player can perform an action at
+	 * a specified block, this could include break, place, light fire
+	 * pvp etc
+	 * @param block
+	 * @param action 1 = place, 2 = break, 3 = pvp
+	 * 5 = tnt place, 6 = access region menu
+	 * @param player
+	 * @return
+	 */
+	private boolean canPerformAction(Block block, int action, Player player)
+	{
+		ProtectedRegion region = BiomeProtect.findRegion(block);
+
+		if(region != null)
+		{
+			switch(action)
+			{
+			case 1:
+				if(!(region.isOwner(player.getUniqueId()) || (region.hasMember(player.getUniqueId()) && region.allowsPlace())))
+				{
+					return false;
+				}
+				break;
+			case 2:
+				if(!(region.isOwner(player.getUniqueId()) || (region.hasMember(player.getUniqueId()) && region.allowsBreak())))
+				{
+					return false;
+				}
+				break;
+			}
 		}
 		
+		
+		return true;
+	}
+	
+	/**
+	 * Check if a player can place a region at the specific block
+	 * @param block
+	 * @param player
+	 * @param stone
+	 * @return
+	 */
+	private boolean canPerformRegionPlace(Block block, Player player, ProtectionStone stone)
+	{
+		int x1 =  block.getX() - stone.getRadius();
+		int y1 = block.getY() - stone.getRadius();
+		int z1 = block.getZ() - stone.getRadius();
+		
+		int x2 = block.getX() + stone.getRadius();
+		int y2 = block.getY() + stone.getRadius();
+		int z2 = block.getZ() + stone.getRadius();
+		
+		int minX = x1 < x2 ? x1 : x2;
+		int minY = y1 < y2 ? y1 : y2;
+		int minZ = z1 < z2 ? z1 : z2;
+		
+		int maxX = x1 > x2 ? x1 : x2;
+		int maxY = y1 > y2 ? y1 : y2;
+		int maxZ = z1 > z2 ? z1 : z2;
+		
+		// Distance check all regions in the players current chunk
+		for(ProtectedRegion region : BiomeProtect.findRegions(block.getChunk()))
+		{
+			if(region.isOwner(player.getUniqueId())) continue;
+			// Get smaller and larger points
+			Location smaller = region.getSmallerPoint();
+			Location larger = region.getLargerPoint();
+			// Compare distances for each coordinate
+			int minXDiff = smaller.getBlockX() < minX ? minX - smaller.getBlockX() : smaller.getBlockX() - minX;
+			int minYDiff = smaller.getBlockY() < minY ? minY - smaller.getBlockY() : smaller.getBlockY() - minY;
+			int minZDiff = smaller.getBlockZ() < minZ ? minZ - smaller.getBlockZ() : smaller.getBlockZ() - minZ;
+			// All four sides
+			int maxXDiff = larger.getBlockX() < maxX ? maxX - larger.getBlockX() : larger.getBlockX() - maxX;
+			int maxYDiff = larger.getBlockY() < maxY ? maxY - larger.getBlockY() : larger.getBlockY() - maxY;
+			int maxZDiff = larger.getBlockZ() < maxZ ? maxZ - larger.getBlockZ() : larger.getBlockZ() - maxZ;
+			// Distance allowed is sum of both protection stones radius
+			int distanceAllowed = region.getRadius() + stone.getRadius();
+			
+			if(minXDiff < distanceAllowed || minYDiff < distanceAllowed || minZDiff < distanceAllowed
+					|| maxXDiff < distanceAllowed || maxYDiff < distanceAllowed || maxZDiff < distanceAllowed)
+			{
+				// Return false if the distance between any one side is smaller then allowed distance
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	@EventHandler
@@ -197,22 +310,7 @@ public class PlayerListener implements Listener {
 	public void onPlayerMoveChunk(PlayerMoveEvent evt)
 	{
 
-		for(ProtectedRegion region : BiomeProtect.getRegionList().getAll())
-		{
-			for(Chunk chunkInRegion : region.getExistingChunks())
-			{
-				Location to = evt.getTo();
-				Chunk toChunk = to.getChunk();
-				// Cache the region if the player steps in a chunk where regions exist
-				if(toChunk.getX() == chunkInRegion.getX() && toChunk.getZ() == chunkInRegion.getZ())
-				{
-					// Generate a region id based on the center block
-					int regionId = region.getCenter().getBlockX() + region.getCenter().getBlockY() + region.getCenter().getBlockZ();
-					// Cache the region for faster all round checks
-					BiomeProtect.getRegionCache().add(region);					
-				}
-			}
-		}
+		cacheRegions(evt.getPlayer());
 	}
 	
 	/**
@@ -250,22 +348,44 @@ public class PlayerListener implements Listener {
 		}
 	}
 	
+	@EventHandler
 	public void playerJoinEvent(PlayerJoinEvent evt)
 	{
-		Player player = evt.getPlayer();
-		Chunk pChunk = evt.getPlayer().getLocation().getChunk();
-		// Cache the region if the player enters in on it
+		cacheRegions(evt.getPlayer());
+	}
+	
+	@EventHandler
+	public void playerTeleport(PlayerTeleportEvent evt)
+	{
+		cacheRegions(evt.getPlayer());
+	}
+	
+	/**
+	 * Caches all regions the player is currently standing in.
+	 * Shouldn't be called too often as it loops the entire database
+	 * @param player
+	 */
+	private void cacheRegions(Player player)
+	{
+		Chunk playerChunk = player.getLocation().getChunk();
+		
+		// Cache the regions the player joins on
 		for(ProtectedRegion region : BiomeProtect.getRegionList().getAll())
 		{
-			for(Chunk chunkInRegion : region.getExistingChunks())
+			// Skip if seperate world
+			if(!region.getCenter().getWorld().getUID().equals(player.getWorld().getUID())) continue;
+			// Loop over existing chunks in the region and cache the region if it exists in the same chunk
+			HashSet<Chunk> regionChunks = region.getExistingChunks();
+			for(Chunk regionChunk : regionChunks)
 			{
-				if(chunkInRegion.getX() == pChunk.getX() && chunkInRegion.getZ() == pChunk.getZ())
+				// Check chunks are same as players
+				if(regionChunk.getX() == playerChunk.getX() && regionChunk.getZ() == playerChunk.getZ())
 				{
 					BiomeProtect.getRegionCache().add(region);
 					break;
 				}
 			}
-		}
+		}		
 	}
 	
 }
