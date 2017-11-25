@@ -125,7 +125,7 @@ public class ProtectedRegion extends ProtectionStone {
 	 */
 	public boolean intercepts(ProtectedRegion compare)
 	{
-		
+		compare.getSmallerPoint().toVector().
 		return false;
 	}
 	
