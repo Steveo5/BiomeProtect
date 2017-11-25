@@ -1,6 +1,7 @@
 package com.hotmail.steven.biomeprotect;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -136,18 +137,7 @@ public class BiomeProtect extends JavaPlugin {
 	{
 		return regions.intercepts(loc);
 	}
-	
-	/**
-	 * Find all regions intercepting another region
-	 * Orders by region priority
-	 * @param region
-	 * @return
-	 */
-	public static List<ProtectedRegion> findInterceptingRegions(ProtectedRegion region)
-	{
-		return regions.intercepts(region);
-	}
-	
+
 	/**
 	 * Find all regions that intercept a block
 	 * @param block
@@ -176,6 +166,33 @@ public class BiomeProtect extends JavaPlugin {
 				}
 			}
 		}
+		return intercepting;
+	}
+	
+	/**
+	 * Find all regions in a set of chunks
+	 * @param chunks
+	 * @return
+	 */
+	public static HashSet<ProtectedRegion> findRegions(HashSet<Chunk> chunks)
+	{
+		HashSet<ProtectedRegion> inChunk = new HashSet<ProtectedRegion>();
+		for(Chunk c : chunks)
+		{
+			inChunk.addAll(findRegions(c));
+		}
+		return inChunk;
+	}
+	
+	public static HashSet<ProtectedRegion> findIntercepting(ProtectedRegion region)
+	{
+		HashSet<ProtectedRegion> intercepting = new HashSet<ProtectedRegion>();
+		// Distance check all regions in the players current chunk
+		for(ProtectedRegion compare : findRegions(region.getExistingChunks()))
+		{
+			if(compare.intercepts(region)) intercepting.add(compare);
+		}
+		
 		return intercepting;
 	}
 	

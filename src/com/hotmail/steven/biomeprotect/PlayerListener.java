@@ -116,10 +116,9 @@ public class PlayerListener implements Listener {
 				BiomeProtect.getRegionData().saveRegion(region, true);
 				
 				// Some debug
-				List<ProtectedRegion> intercepting = BiomeProtect.findInterceptingRegions(region);
 				player.sendMessage("Region priority " + region.getPriority());
 				player.sendMessage("Total intercepting " + intercepting.size());
-				for(ProtectedRegion interceptingRegion : intercepting)
+				for(ProtectedRegion interceptingRegion : interceptingRegions)
 				{
 					player.sendMessage("- " + interceptingRegion.getId());
 				}
@@ -247,6 +246,9 @@ public class PlayerListener implements Listener {
 			int maxXDiff = larger.getBlockX() < maxX ? maxX - larger.getBlockX() : larger.getBlockX() - maxX;
 			int maxYDiff = larger.getBlockY() < maxY ? maxY - larger.getBlockY() : larger.getBlockY() - maxY;
 			int maxZDiff = larger.getBlockZ() < maxZ ? maxZ - larger.getBlockZ() : larger.getBlockZ() - maxZ;
+			
+			System.out.println("Min diffs " + minXDiff + " " + minYDiff + " " + minZDiff);
+			System.out.println("Max diffs " + maxXDiff + " " + maxYDiff + " " + maxZDiff);
 			// Distance allowed is sum of both protection stones radius
 			int distanceAllowed = region.getRadius() + stone.getRadius();
 			

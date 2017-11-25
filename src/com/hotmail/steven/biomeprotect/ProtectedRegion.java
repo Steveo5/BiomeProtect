@@ -118,26 +118,13 @@ public class ProtectedRegion extends ProtectionStone {
 		return LocationUtil.boxContains(getSmallerPoint(), getLargerPoint(), loc);
 	}
 	
-	public boolean isIntercepting(ProtectedRegion region)
+	/**
+	 * Checks if a protected region intercepts this region
+	 * @param compare
+	 * @return
+	 */
+	public boolean intercepts(ProtectedRegion compare)
 	{
-		if(!region.getSmallerPoint().getWorld().getUID().equals(this.getSmallerPoint().getWorld().getUID())) return false;
-		
-		// Compare chunks first so the distance check isn't too far
-		for(Chunk c : getExistingChunks())
-		{
-			for(Chunk compare : region.getExistingChunks())
-			{
-				if(c.getX() == compare.getX() && c.getZ() == compare.getZ())
-				{
-					Location compareCenter = region.getCenter();
-					Location center = getCenter();
-					
-					double distance = Math.round(compareCenter.distance(center));
-					System.out.println("Distance from " + region.getId() + " " + distance);
-					if(distance <= getRadius() + region.getRadius()) return true;
-				}
-			}
-		}
 		
 		return false;
 	}

@@ -75,23 +75,6 @@ public class ProtectedRegionList<E> {
     	return intercepting;
     }
     
-    public List<ProtectedRegion> intercepts(ProtectedRegion region)
-    {
-    	List<ProtectedRegion> intercepting = new ArrayList<ProtectedRegion>();
-    	RegionCache cache = BiomeProtect.getRegionCache();
-    	// Brute force for now
-    	for(ProtectedRegion cachedRegion : cache.getCache().values())
-    	{
-    		if(cachedRegion.getId().equals(region.getId())) continue;
-    		// Check if the cache regions larger and smaller points overlap the 
-    		if(cachedRegion.isIntercepting(region))
-    		{
-    			intercepting.add(cachedRegion);
-    		}
-    	}
-    	return intercepting;
-    }
-    
     /**
      * Gets the highest priority region in a list of regions
      * @param regionList
