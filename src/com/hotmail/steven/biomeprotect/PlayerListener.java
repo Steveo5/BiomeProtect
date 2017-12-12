@@ -23,6 +23,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.util.BlockVector;
 
 import static com.hotmail.steven.biomeprotect.Language.tl;
 
@@ -103,7 +104,7 @@ public class PlayerListener implements Listener {
 				UUID newId = UUID.randomUUID();
 				region.setUUID(newId);
 				// Find the intercepting regions
-				List<ProtectedRegion> interceptingRegions = BiomeProtect.findInterceptingRegions(region);
+				HashSet<ProtectedRegion> interceptingRegions = BiomeProtect.findIntercepting(region);
 				// Get the highest priority from the intercepting regions
 				ProtectedRegion highestPriorityRegion = BiomeProtect.getRegionList().getHighestPriority(interceptingRegions);
 				int highestPriority = highestPriorityRegion == null ? 0 : highestPriorityRegion.getPriority();
@@ -117,7 +118,7 @@ public class PlayerListener implements Listener {
 				
 				// Some debug
 				player.sendMessage("Region priority " + region.getPriority());
-				player.sendMessage("Total intercepting " + intercepting.size());
+				player.sendMessage("Total intercepting " + interceptingRegions.size());
 				for(ProtectedRegion interceptingRegion : interceptingRegions)
 				{
 					player.sendMessage("- " + interceptingRegion.getId());
@@ -215,6 +216,17 @@ public class PlayerListener implements Listener {
 	 */
 	private boolean canPerformRegionPlace(Block block, Player player, ProtectionStone stone)
 	{
+		ProtectedRegion proposedRegion = new ProtectedRegion(stone, player.getUniqueId(), block.getLocation());
+		// Check the bounding box of the temporary region versus any regions cached
+		for(ProtectedRegion region : BiomeProtect.getRegionCache().getCache().values())
+		{
+			if(proposedRegion.interceptBoundingBox(region) && !region.isOwner(player.getUniqueId()))
+			{
+				return false;
+			}
+		}
+		return true;
+		/*
 		int x1 =  block.getX() - stone.getRadius();
 		int y1 = block.getY() - stone.getRadius();
 		int z1 = block.getZ() - stone.getRadius();
@@ -236,8 +248,8 @@ public class PlayerListener implements Listener {
 		{
 			if(region.isOwner(player.getUniqueId())) continue;
 			// Get smaller and larger points
-			Location smaller = region.getSmallerPoint();
-			Location larger = region.getLargerPoint();
+			BlockVector smaller = region.getSmallerPoint();
+			BlockVector larger = region.getLargerPoint();
 			// Compare distances for each coordinate
 			int minXDiff = smaller.getBlockX() < minX ? minX - smaller.getBlockX() : smaller.getBlockX() - minX;
 			int minYDiff = smaller.getBlockY() < minY ? minY - smaller.getBlockY() : smaller.getBlockY() - minY;
@@ -260,6 +272,7 @@ public class PlayerListener implements Listener {
 			}
 		}
 		return true;
+		*/
 	}
 	
 	@EventHandler

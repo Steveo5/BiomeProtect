@@ -2,6 +2,7 @@ package com.hotmail.steven.biomeprotect;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import org.bukkit.Chunk;
@@ -56,9 +57,9 @@ public class ProtectedRegionList<E> {
      * @param loc
      * @return
      */
-    public List<ProtectedRegion> intercepts(Location loc)
+    public HashSet<ProtectedRegion> intercepts(Location loc)
     {
-    	List<ProtectedRegion> intercepting = new ArrayList<ProtectedRegion>();
+    	HashSet<ProtectedRegion> intercepting = new HashSet<ProtectedRegion>();
     	RegionCache cache = BiomeProtect.getRegionCache();
     	
     	// Brute force for now
@@ -80,14 +81,14 @@ public class ProtectedRegionList<E> {
      * @param regionList
      * @return
      */
-    public ProtectedRegion getHighestPriority(List<ProtectedRegion> regionList)
+    public ProtectedRegion getHighestPriority(HashSet<ProtectedRegion> regionList)
     {
     	if(regionList.size() < 1) return null;
     	
-    	ProtectedRegion highestPriority = regionList.get(0);   	
+    	ProtectedRegion highestPriority = null;
     	for(ProtectedRegion region : regionList)
     	{
-    		if(region.getPriority() > highestPriority.getPriority()) highestPriority = region;
+    		if(highestPriority == null || region.getPriority() > highestPriority.getPriority()) highestPriority = region;
     	}
     	
     	return highestPriority;

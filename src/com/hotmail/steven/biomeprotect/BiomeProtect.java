@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -33,6 +34,7 @@ public class BiomeProtect extends JavaPlugin {
 		// Register player listener
 		getServer().getPluginManager().registerEvents(new PlayerListener(), this);
 		getServer().getPluginManager().registerEvents(menu, this);
+		getServer().getPluginManager().registerEvents(new WorldListener(), this);
 		this.getCommand("biomeprotect").setExecutor(new CommandHandler());
 		
 		plugin = this;
@@ -40,8 +42,9 @@ public class BiomeProtect extends JavaPlugin {
 		RegionSettings.loadProtectionStones();
 		regionCache = new RegionCache();
 		
-		//TODO Implement in a different thread
+		Logger.Log(Level.INFO, "Loading regions shortly...");
 		regionData.loadRegions();
+		
 	}
 	
 	@Override
@@ -133,7 +136,7 @@ public class BiomeProtect extends JavaPlugin {
 	 * @param block
 	 * @return
 	 */
-	public static List<ProtectedRegion> findRegions(Location loc)
+	public static HashSet<ProtectedRegion> findRegions(Location loc)
 	{
 		return regions.intercepts(loc);
 	}
@@ -143,7 +146,7 @@ public class BiomeProtect extends JavaPlugin {
 	 * @param block
 	 * @return
 	 */
-	public static List<ProtectedRegion> findRegions(Block block)
+	public static HashSet<ProtectedRegion> findRegions(Block block)
 	{
 		return findRegions(block.getLocation());
 	}
@@ -153,9 +156,9 @@ public class BiomeProtect extends JavaPlugin {
 	 * @param chunk
 	 * @return
 	 */
-	public static List<ProtectedRegion> findRegions(Chunk chunk)
+	public static HashSet<ProtectedRegion> findRegions(Chunk chunk)
 	{
-		List<ProtectedRegion> intercepting = new ArrayList<ProtectedRegion>();
+		HashSet<ProtectedRegion> intercepting = new HashSet<ProtectedRegion>();
 		for(ProtectedRegion region : getRegionCache().getCache().values())
 		{
 			for(Chunk c : region.getExistingChunks())
@@ -190,7 +193,7 @@ public class BiomeProtect extends JavaPlugin {
 		// Distance check all regions in the players current chunk
 		for(ProtectedRegion compare : findRegions(region.getExistingChunks()))
 		{
-			if(compare.intercepts(region)) intercepting.add(compare);
+			if(compare.interceptBoundingBox(region)) intercepting.add(compare);
 		}
 		
 		return intercepting;

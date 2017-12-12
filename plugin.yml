@@ -2,7 +2,7 @@
  version: 1.0.1
  description: Allows players to protect regions
  author: firecombat4
- 
+ load: POSTWORLD
  main: com.hotmail.steven.biomeprotect.BiomeProtect
  database: false
  

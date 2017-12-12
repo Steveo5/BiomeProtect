@@ -25,6 +25,7 @@ public class RegionData {
 	// Hold mysql database details
 	private String host, database, username, password;
 	private int port;
+	private BiomeProtect plugin;
 	
 	public RegionData(BiomeProtect plugin)
 	{
@@ -151,8 +152,10 @@ public class RegionData {
 		}
 	}
 	
+	
 	public void loadRegions()
 	{
+		int regionsLoaded = 0;
 		if(RegionSettings.getStorageType().equals("mysql"))
 		{
 			try
@@ -168,7 +171,11 @@ public class RegionData {
 					int y = rs.getInt(4);
 					int z = rs.getInt(5);
 					World w = Bukkit.getWorld(UUID.fromString(rs.getString(6)));
-					
+					if(w == null)
+					{
+						Logger.Log(Level.WARNING, "Failed to load cuboid " + id + " as no world was found");
+						continue;
+					}
 					String name = rs.getString(7);
 					Material mat = Material.valueOf(rs.getString(8));
 					int data = rs.getInt(9);
@@ -205,6 +212,7 @@ public class RegionData {
 					
 					ProtectedRegion region = BiomeProtect.defineRegion(settings, owner, new Location(w, x, y, z));
 					region.setUUID(id);
+					regionsLoaded++;
 
 				}
 			} catch(SQLException e)
@@ -212,6 +220,7 @@ public class RegionData {
 				e.printStackTrace();
 			}
 		}
+		Logger.Log(Level.INFO, regionsLoaded + " regions have been loaded");
 	}
 	
 	/**
@@ -254,7 +263,7 @@ public class RegionData {
 		int x = region.getCenter().getBlockX();
 		int y = region.getCenter().getBlockY();
 		int z = region.getCenter().getBlockZ();
-		UUID world = region.getSmallerPoint().getWorld().getUID();
+		UUID world = region.getWorld().getUID();
 		UUID id = region.getId();
 		
 		String name = region.getName();

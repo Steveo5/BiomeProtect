@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.util.BlockVector;
 
 import com.hotmail.steven.biomeprotect.Logger;
 
@@ -19,7 +20,7 @@ public class LocationUtil {
      * @param search
      * @return
      */
-    public static boolean boxContains(Location smaller, Location larger, Location search)
+    public static boolean boxContains(BlockVector smaller, BlockVector larger, Location search)
     {
     	if(search.getBlockX() >= smaller.getBlockX() && search.getBlockY() >= smaller.getBlockY() && search.getBlockZ() >= smaller.getBlockZ())
     	{
@@ -36,11 +37,9 @@ public class LocationUtil {
      * @param smaller
      * @param larger
      */
-    public static HashSet<Chunk> getAllChunks(Location p1, Location p2)
+    public static HashSet<Chunk> getAllChunks(World w, BlockVector p1, BlockVector p2)
     {
     	HashSet<Chunk> chunks = new HashSet<Chunk>();
-    	
-    	World w = p1.getWorld();
 
         for (int x = p1.getBlockX(); x <= p2.getBlockX(); x+=5) {
        

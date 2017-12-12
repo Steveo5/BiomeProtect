@@ -10,16 +10,20 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BlockIterator;
+import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 
 import com.hotmail.steven.util.LocationUtil;
 
 public class ProtectedRegion extends ProtectionStone {
 
-	private Location center, point1, point2;
+	private Location center;
+	BlockVector point2;
+	BlockVector point1;
 	private UUID owner;
 	private List<Block> shownBlocks;
 	private HashSet<Chunk> chunks;
@@ -46,8 +50,8 @@ public class ProtectedRegion extends ProtectionStone {
 		int p2Y = p1.getBlockY() > p2.getBlockY() ? p1.getBlockY() : p2.getBlockY();
 		int p2Z = p1.getBlockZ() > p2.getBlockZ() ? p1.getBlockZ() : p2.getBlockZ();
 		
-		point1 = new Location(p1.getWorld(), p1X, p1Y, p1Z);
-		point2 = new Location(p2.getWorld(), p2X, p2Y, p2Z);
+		point1 = new BlockVector(p1X, p1Y, p1Z);
+		point2 = new BlockVector(p2X, p2Y, p2Z);
 		// Generate id based on 3d to 1d
 		// Copy the flags over
 		if(base.hasWelcomeMessage()) setWelcomeMessage(base.getWelcomeMessage());
@@ -58,7 +62,7 @@ public class ProtectedRegion extends ProtectionStone {
 		setAllowsPvp(base.allowsPvp());
 		setAllowsTnt(base.allowsTnt());
 		// Get existing chunks this region resides
-		chunks = LocationUtil.getAllChunks(point1, point2);
+		chunks = LocationUtil.getAllChunks(getWorld(), point1, point2);
 		Logger.Log(Level.INFO, Bukkit.getOfflinePlayer(owner).getName() + " placed a field at " + center.getBlockX() + " " + center.getBlockY() + " " + center.getBlockZ());
 		Logger.Log(Level.INFO, "Region intercepts " + chunks.size() + " chunks");
 		Logger.Log(Level.INFO, "Min location " + point1.getBlockX() + " " + point1.getBlockY() + " " + point1.getBlockZ());
@@ -103,6 +107,11 @@ public class ProtectedRegion extends ProtectionStone {
 		playersInRegion.remove(player);
 	}
 	
+	public World getWorld()
+	{
+		return getCenter().getWorld();
+	}
+	
 	/**
 	 * Check if a player is inside this region
 	 * @param uuid
@@ -123,10 +132,23 @@ public class ProtectedRegion extends ProtectionStone {
 	 * @param compare
 	 * @return
 	 */
-	public boolean intercepts(ProtectedRegion compare)
+	public boolean interceptBoundingBox(ProtectedRegion compare)
 	{
-		compare.getSmallerPoint().toVector().
-		return false;
+        BlockVector rMaxPoint = compare.getLargerPoint();
+        BlockVector min = getSmallerPoint();
+
+        if (rMaxPoint.getBlockX() < min.getBlockX()) return false;
+        if (rMaxPoint.getBlockY() < min.getBlockY()) return false;
+        if (rMaxPoint.getBlockZ() < min.getBlockZ()) return false;
+
+        BlockVector rMinPoint = compare.getSmallerPoint();
+        BlockVector max = getLargerPoint();
+
+        if (rMinPoint.getBlockX() > max.getBlockX()) return false;
+        if (rMinPoint.getBlockY() > max.getBlockY()) return false;
+        if (rMinPoint.getBlockZ() > max.getBlockZ()) return false;
+
+        return true;
 	}
 	
 	public UUID getId()
@@ -134,12 +156,12 @@ public class ProtectedRegion extends ProtectionStone {
 		return id;
 	}
 	
-	public Location getSmallerPoint()
+	public BlockVector getSmallerPoint()
 	{
 		return point1;
 	}
 	
-	public Location getLargerPoint()
+	public BlockVector getLargerPoint()
 	{
 		return point2;
 	}
@@ -175,40 +197,40 @@ public class ProtectedRegion extends ProtectionStone {
 		// Get all blocks in the square
 		for(int i=0;i<radius * 2;i++)
 		{
-			Block bottom1X = point1.getWorld().getBlockAt(p1X + i,  p1Y, p1Z);
+			Block bottom1X = getWorld().getBlockAt(p1X + i,  p1Y, p1Z);
 			shownBlocks.add(bottom1X);
 			
-			Block top1X = point1.getWorld().getBlockAt(p1X + i,  p1Y + diameter, p1Z);
+			Block top1X = getWorld().getBlockAt(p1X + i,  p1Y + diameter, p1Z);
 			shownBlocks.add(top1X);
 			
-			Block firstY = point1.getWorld().getBlockAt(p1X, p1Y + i, p1Z);
+			Block firstY = getWorld().getBlockAt(p1X, p1Y + i, p1Z);
 			shownBlocks.add(firstY);
 			
-			Block bottom1Z = point1.getWorld().getBlockAt(p1X, p1Y, p1Z + i);
+			Block bottom1Z = getWorld().getBlockAt(p1X, p1Y, p1Z + i);
 			shownBlocks.add(bottom1Z);
 			
-			Block top1Z = point1.getWorld().getBlockAt(p1X, p1Y + diameter, p1Z + i);
+			Block top1Z = getWorld().getBlockAt(p1X, p1Y + diameter, p1Z + i);
 			shownBlocks.add(top1Z);
 			
-			Block top2X = point1.getWorld().getBlockAt(p2X - i,  p2Y, p2Z);
+			Block top2X = getWorld().getBlockAt(p2X - i,  p2Y, p2Z);
 			shownBlocks.add(top2X);
 			
-			Block bottom2X = point1.getWorld().getBlockAt(p2X - i,  p2Y - diameter, p2Z);
+			Block bottom2X = getWorld().getBlockAt(p2X - i,  p2Y - diameter, p2Z);
 			shownBlocks.add(bottom2X);
 			
-			Block thirdY = point1.getWorld().getBlockAt(p2X, p2Y - i, p2Z);
+			Block thirdY = getWorld().getBlockAt(p2X, p2Y - i, p2Z);
 			shownBlocks.add(thirdY);
 			
-			Block top2Z = point1.getWorld().getBlockAt(p2X, p2Y, p2Z - i);
+			Block top2Z = getWorld().getBlockAt(p2X, p2Y, p2Z - i);
 			shownBlocks.add(top2Z);
 			
-			Block bottom2Z = point1.getWorld().getBlockAt(p2X, p2Y - diameter, p2Z - i);
+			Block bottom2Z = getWorld().getBlockAt(p2X, p2Y - diameter, p2Z - i);
 			shownBlocks.add(bottom2Z);
 			
-			Block secondY = point1.getWorld().getBlockAt(p1X + diameter, p2Y - i, p1Z);
+			Block secondY = getWorld().getBlockAt(p1X + diameter, p2Y - i, p1Z);
 			shownBlocks.add(secondY);
 			
-			Block fourthY = point1.getWorld().getBlockAt(p2X - diameter, p2Y - i, p2Z);
+			Block fourthY = getWorld().getBlockAt(p2X - diameter, p2Y - i, p2Z);
 			shownBlocks.add(fourthY);
 		}
 		
@@ -220,7 +242,7 @@ public class ProtectedRegion extends ProtectionStone {
 			}
 		}
 		
-		new BlockCleanupTask(shownBlocks).runTaskLater(BiomeProtect.instance(), 20L * 5);
+		new BlockCleanupTask(shownBlocks).runTaskLater(BiomeProtect.instance(), 20L * 40);
 	}
 	
 	/**
@@ -246,7 +268,7 @@ public class ProtectedRegion extends ProtectionStone {
 	 */
 	public static boolean hasBreakPermission(UUID uuid, Location loc)
 	{
-		List<ProtectedRegion> foundRegions = BiomeProtect.findRegions(loc);
+		HashSet<ProtectedRegion> foundRegions = BiomeProtect.findRegions(loc);
 		
 		if(foundRegions.size() > 0)
 		{
@@ -265,7 +287,7 @@ public class ProtectedRegion extends ProtectionStone {
 	
 	public static boolean hasPlacePermission(UUID uuid, Location loc)
 	{
-		List<ProtectedRegion> foundRegions = BiomeProtect.findRegions(loc);
+		HashSet<ProtectedRegion> foundRegions = BiomeProtect.findRegions(loc);
 		
 		if(foundRegions.size() > 0)
 		{
