@@ -1,4 +1,4 @@
-package com.hotmail.steven.biomeprotect;
+package com.hotmail.steven.biomeprotect.storage;
 
 import java.io.File;
 import java.sql.DriverManager;
@@ -14,6 +14,10 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import com.hotmail.steven.biomeprotect.BiomeProtect;
+import com.hotmail.steven.biomeprotect.Logger;
+import com.hotmail.steven.biomeprotect.region.ProtectedRegion;
+import com.hotmail.steven.biomeprotect.region.RegionCreator;
 import com.mysql.jdbc.Connection;
 
 public class RegionData {
@@ -29,13 +33,13 @@ public class RegionData {
 	
 	public RegionData(BiomeProtect plugin)
 	{
-		if(RegionSettings.getStorageType().equals("mysql"))
+		if(RegionConfig.getStorageType().equals("mysql"))
 		{
-			host = RegionSettings.getMysqlUrl();
-			username = RegionSettings.getMysqlUser();
-			database = RegionSettings.getMysqlDb();
-			password = RegionSettings.getMysqlPass();
-			port = RegionSettings.getMysqlPort();
+			host = RegionConfig.getMysqlUrl();
+			username = RegionConfig.getMysqlUser();
+			database = RegionConfig.getMysqlDb();
+			password = RegionConfig.getMysqlPass();
+			port = RegionConfig.getMysqlPort();
 			
 	        try {    
 	            openConnection(); 
@@ -152,11 +156,11 @@ public class RegionData {
 		}
 	}
 	
-	
+	/*
 	public void loadRegions()
 	{
 		int regionsLoaded = 0;
-		if(RegionSettings.getStorageType().equals("mysql"))
+		if(RegionConfig.getStorageType().equals("mysql"))
 		{
 			try
 			{
@@ -181,7 +185,7 @@ public class RegionData {
 					int data = rs.getInt(9);
 					int radius = rs.getInt(10);
 					
-					ProtectionStone settings = new ProtectionStone(name, mat, data, radius);
+					RegionCreator settings = new RegionCreator(name, mat, data, radius);
 					Statement flagStatement = connection.createStatement();
 					for(int i=1;i<6;i++)
 					{
@@ -265,7 +269,8 @@ public class RegionData {
 		int z = region.getCenter().getBlockZ();
 		UUID world = region.getWorld().getUID();
 		UUID id = region.getId();
-		
+	}
+		/*
 		String name = region.getName();
 		String mat = region.getMaterial().name();
 		int data = region.getData();

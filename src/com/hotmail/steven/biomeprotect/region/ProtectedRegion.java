@@ -1,7 +1,8 @@
-package com.hotmail.steven.biomeprotect;
+package com.hotmail.steven.biomeprotect.region;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -17,61 +18,53 @@ import org.bukkit.util.BlockIterator;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 
+import com.hotmail.steven.biomeprotect.BiomeProtect;
+import com.hotmail.steven.biomeprotect.BlockCleanupTask;
+import com.hotmail.steven.biomeprotect.Logger;
+import com.hotmail.steven.biomeprotect.flag.RegionFlag;
 import com.hotmail.steven.util.LocationUtil;
 
-public class ProtectedRegion extends ProtectionStone {
+public class ProtectedRegion extends Region {
 
-	private Location center;
-	BlockVector point2;
-	BlockVector point1;
 	private UUID owner;
+	/**
+	 * Hold the blocks shown when displaying the area
+	 * in the physical world
+	 */
 	private List<Block> shownBlocks;
 	private HashSet<Chunk> chunks;
 	private UUID id;
 	private HashSet<Player> playersInRegion;
 	private HashSet<UUID> members;
+	private HashSet<RegionFlag<?>> flags;
+	private int priority;
+	private String name;
 
-	public ProtectedRegion(ProtectionStone base, UUID owner, Location center)
+	protected ProtectedRegion(String name, UUID id, UUID owner, Location center, int radius, int height)
 	{
-		super(base.getName(), base.getMaterial(), base.getData(), base.getRadius());
+		super(center, radius, height);
+		this.name = name;
 		shownBlocks = new ArrayList<Block>();
 		playersInRegion = new HashSet<Player>();
 		members = new HashSet<UUID>();
 		this.owner = owner;
-		this.center = center;
-		Location p1 = this.center.clone().subtract(base.getRadius(), base.getCustomHeight() == -1 ? base.getRadius() : base.getCustomHeight(), base.getRadius());
-		Location p2 = this.center.clone().add(base.getRadius(), base.getCustomHeight() == -1 ? base.getRadius() : base.getCustomHeight(), base.getRadius());
-		// Set the smaller and larger points
-		int p1X = p1.getBlockX() < p2.getBlockX() ? p1.getBlockX() : p2.getBlockX();
-		int p1Y = p1.getBlockY() < p2.getBlockY() ? p1.getBlockY() : p2.getBlockY();
-		int p1Z = p1.getBlockZ() < p2.getBlockZ() ? p1.getBlockZ() : p2.getBlockZ();
-		
-		int p2X = p1.getBlockX() > p2.getBlockX() ? p1.getBlockX() : p2.getBlockX();
-		int p2Y = p1.getBlockY() > p2.getBlockY() ? p1.getBlockY() : p2.getBlockY();
-		int p2Z = p1.getBlockZ() > p2.getBlockZ() ? p1.getBlockZ() : p2.getBlockZ();
-		
-		point1 = new BlockVector(p1X, p1Y, p1Z);
-		point2 = new BlockVector(p2X, p2Y, p2Z);
-		// Generate id based on 3d to 1d
-		// Copy the flags over
-		if(base.hasWelcomeMessage()) setWelcomeMessage(base.getWelcomeMessage());
-		if(base.hasLeaveMessage()) setLeaveMessage(base.getLeaveMessage());
-		setAllowsBreak(base.allowsBreak());
-		setAllowsPlace(base.allowsPlace());
-		if(base.getCustomHeight() != -1) this.setCustomHeight(base.getCustomHeight());
-		setAllowsPvp(base.allowsPvp());
-		setAllowsTnt(base.allowsTnt());
+		this.id = id;
 		// Get existing chunks this region resides
-		chunks = LocationUtil.getAllChunks(getWorld(), point1, point2);
+		chunks = LocationUtil.getAllChunks(getWorld(), getSmallerPoint(), getLargerPoint());
 		Logger.Log(Level.INFO, Bukkit.getOfflinePlayer(owner).getName() + " placed a field at " + center.getBlockX() + " " + center.getBlockY() + " " + center.getBlockZ());
 		Logger.Log(Level.INFO, "Region intercepts " + chunks.size() + " chunks");
-		Logger.Log(Level.INFO, "Min location " + point1.getBlockX() + " " + point1.getBlockY() + " " + point1.getBlockZ());
-		Logger.Log(Level.INFO, "Max location " + point2.getBlockX() + " " + point2.getBlockY() + " " + point2.getBlockZ());
+		
+		flags = new HashSet<RegionFlag<?>>();
 	}
 	
 	protected void setUUID(UUID id)
 	{
 		this.id = id;
+	}
+	
+	public String getName()
+	{
+		return name;
 	}
 	
 	/**
@@ -81,6 +74,77 @@ public class ProtectedRegion extends ProtectionStone {
 	public HashSet<Chunk> getExistingChunks()
 	{
 		return chunks;
+	}
+	
+	/**
+	 * Get all the flags this protected region has.
+	 * Returns a hash set so only one of each type
+	 * should be able to exist
+	 * @return
+	 */
+	public HashSet<RegionFlag<?>> getFlags()
+	{
+		return flags;
+	}
+	
+	/**
+	 * Check if a flag exists based on the string name
+	 * @param name
+	 * @return
+	 */
+	public boolean hasFlag(String name)
+	{
+		for(RegionFlag<?> flag : flags)
+		{
+			if(flag.getName().equalsIgnoreCase(name)) return true;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Add a new flag to this protected regions flag list
+	 * @param flag
+	 */
+	public void addFlag(RegionFlag<?> flag)
+	{
+		flags.add(flag);
+	}
+	
+	/**
+	 * Get a region flag from its string name
+	 * @param name
+	 * @return
+	 */
+	public RegionFlag<?> getFlag(String name)
+	{
+		Iterator<RegionFlag<?>> itrFlag = flags.iterator();
+		// Loop over the existing flags
+		while(itrFlag.hasNext())
+		{
+			RegionFlag<?> next = itrFlag.next();
+			// Remove the flag from this region if it exists
+			if(next.getName().equalsIgnoreCase(name)) return next;
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Remove a flag from this protected region, causing it to
+	 * no longer have effect
+	 * @param name
+	 */
+	public void removeFlag(String name)
+	{
+		Iterator<RegionFlag<?>> itrFlag = flags.iterator();
+		// Loop over the existing flags
+		while(itrFlag.hasNext())
+		{
+			RegionFlag<?> next = itrFlag.next();
+			// Remove the flag from this region if it exists
+			if(next.getName().equalsIgnoreCase(name)) itrFlag.remove();
+		}
 	}
 	
 	/**
@@ -113,6 +177,29 @@ public class ProtectedRegion extends ProtectionStone {
 	}
 	
 	/**
+	 * Gets this regions priority
+	 * @return
+	 */
+	public int getPriority()
+	{
+		return priority;
+	}
+	
+	/**
+	 * Set the priority for this region, if more then one region
+	 * is touching/existing in this region then all priorities should be
+	 * different.
+	 * 
+	 * Higher priorities will mean that block place checking, pvp flags etc
+	 * will be prioritized in this region instead of the parent region
+	 * @param priority
+	 */
+	public void setPriority(int priority)
+	{
+		this.priority = priority;
+	}
+	
+	/**
 	 * Check if a player is inside this region
 	 * @param uuid
 	 * @return
@@ -127,48 +214,9 @@ public class ProtectedRegion extends ProtectionStone {
 		return LocationUtil.boxContains(getSmallerPoint(), getLargerPoint(), loc);
 	}
 	
-	/**
-	 * Checks if a protected region intercepts this region
-	 * @param compare
-	 * @return
-	 */
-	public boolean interceptBoundingBox(ProtectedRegion compare)
-	{
-        BlockVector rMaxPoint = compare.getLargerPoint();
-        BlockVector min = getSmallerPoint();
-
-        if (rMaxPoint.getBlockX() < min.getBlockX()) return false;
-        if (rMaxPoint.getBlockY() < min.getBlockY()) return false;
-        if (rMaxPoint.getBlockZ() < min.getBlockZ()) return false;
-
-        BlockVector rMinPoint = compare.getSmallerPoint();
-        BlockVector max = getLargerPoint();
-
-        if (rMinPoint.getBlockX() > max.getBlockX()) return false;
-        if (rMinPoint.getBlockY() > max.getBlockY()) return false;
-        if (rMinPoint.getBlockZ() > max.getBlockZ()) return false;
-
-        return true;
-	}
-	
 	public UUID getId()
 	{
 		return id;
-	}
-	
-	public BlockVector getSmallerPoint()
-	{
-		return point1;
-	}
-	
-	public BlockVector getLargerPoint()
-	{
-		return point2;
-	}
-	
-	public Location getCenter()
-	{
-		return center;
 	}
 	
 	public UUID getOwner()
@@ -176,16 +224,11 @@ public class ProtectedRegion extends ProtectionStone {
 		return owner;
 	}
 	
-	public void remove()
-	{
-		BiomeProtect.removeProtectedRegion(this);
-		if(BiomeProtect.getRegionCache().isCached(getId()))
-			BiomeProtect.getRegionCache().getCache().remove(getId());
-	}
-	
 	public void show()
 	{
-		int radius = this.getRadius();
+		int radius = getRadius();
+		BlockVector point1 = getSmallerPoint();
+		BlockVector point2 = getLargerPoint();
 		int p1X = point1.getBlockX() < point2.getBlockX() ? point1.getBlockX() : point2.getBlockX();
 		int p1Y = point1.getBlockY() < point2.getBlockY() ? point1.getBlockY() : point2.getBlockY();
 		int p1Z = point1.getBlockZ() < point2.getBlockZ() ? point1.getBlockZ() : point2.getBlockZ();
@@ -261,51 +304,7 @@ public class ProtectedRegion extends ProtectionStone {
 	}
 	
 	/**
-	 * Checks if a user can break blocks at the location
-	 * @param uuid
-	 * @param loc
-	 * @return
-	 */
-	public static boolean hasBreakPermission(UUID uuid, Location loc)
-	{
-		HashSet<ProtectedRegion> foundRegions = BiomeProtect.findRegions(loc);
-		
-		if(foundRegions.size() > 0)
-		{
-			for(ProtectedRegion region : foundRegions)
-			{
-				// Check ownership of the region
-				if(!region.hasPermission(uuid))
-				{
-					return false;
-				}
-			}
-		}	
-		
-		return true;	
-	}
-	
-	public static boolean hasPlacePermission(UUID uuid, Location loc)
-	{
-		HashSet<ProtectedRegion> foundRegions = BiomeProtect.findRegions(loc);
-		
-		if(foundRegions.size() > 0)
-		{
-			for(ProtectedRegion region : foundRegions)
-			{
-				// Check ownership of the region
-				if(!region.hasPermission(uuid))
-				{
-					return false;
-				}
-			}
-		}	
-		
-		return true;		
-	}
-	
-	/**
-	 * Get all the members who have build, pvp etc permission in the region
+	 * Get all the members of this region
 	 * @return
 	 */
 	public HashSet<UUID> getMembers()
@@ -344,6 +343,17 @@ public class ProtectedRegion extends ProtectionStone {
 		String maxString = "Max x " + getLargerPoint().getBlockX() + " Max y " + getLargerPoint().getBlockY() + " Max z " + getLargerPoint().getBlockZ();
 	
 		return minString + "\n" + maxString;
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if(obj instanceof ProtectedRegion)
+		{
+			ProtectedRegion region = (ProtectedRegion)obj;
+			if(region.getId().equals(getId())) return true;
+		}
+		return false;
 	}
 	
 }

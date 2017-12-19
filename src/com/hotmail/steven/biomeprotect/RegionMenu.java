@@ -20,6 +20,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.hotmail.steven.biomeprotect.region.ProtectedRegion;
 import com.hotmail.steven.util.PlayerUtil;
 import com.hotmail.steven.util.StringUtil;
 import com.mysql.fabric.xmlrpc.base.Array;
@@ -34,7 +35,7 @@ public class RegionMenu implements Listener {
 		inventories = new HashMap<UUID, UUID>();
 		inputWaiting = new HashMap<UUID, Integer>();
 	}
-	
+	/*
 	public void show(Player player, ProtectedRegion region)
 	{
 		Inventory inv = Bukkit.createInventory(null, 18, StringUtil.colorize("&c&lManage protected region"));
@@ -260,5 +261,6 @@ public class RegionMenu implements Listener {
 			inventories.remove(evt.getPlayer().getUniqueId());
 		}		
 	}
+	*/
 	
 }

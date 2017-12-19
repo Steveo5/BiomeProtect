@@ -1,4 +1,4 @@
-package com.hotmail.steven.biomeprotect;
+package com.hotmail.steven.biomeprotect.storage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,12 +7,20 @@ import java.util.logging.Level;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
+import com.hotmail.steven.biomeprotect.BiomeProtect;
+import com.hotmail.steven.biomeprotect.region.RegionCreator;
 import com.hotmail.steven.util.StringUtil;
 
-public class RegionSettings {
-
-	private static List<ProtectionStone> protectionStones;
+public class RegionConfig {
+	
+	private BiomeProtect plugin;
+	
+	public RegionConfig(BiomeProtect plugin)
+	{
+		this.plugin = plugin;
+	}
 	
 	/**
 	 * Get the database type, either flatfile, mysql
@@ -60,9 +68,10 @@ public class RegionSettings {
 	}
 	
 	// Load the protection stones from the database
+	/*
 	protected static void loadProtectionStones()
 	{
-		protectionStones = new ArrayList<ProtectionStone>();
+		protectionStones = new ArrayList<RegionCreator>();
 		int loaded = 0;
 		for(ConfigurationSection configSection : getProtectionList())
 		{
@@ -70,7 +79,7 @@ public class RegionSettings {
 			int data = configSection.contains("data") ? data = configSection.getInt("data") : 0;
 			int radius = configSection.getInt("radius");
 			
-			ProtectionStone protectionStone = new ProtectionStone(configSection.getName(), mat, data, radius);
+			RegionCreator protectionStone = new RegionCreator(configSection.getName(), mat, data, radius);
 			
 			if(configSection.contains("custom-height")) protectionStone.setCustomHeight(configSection.getInt("custom-height"));
 			if(configSection.contains("prevent-place")) protectionStone.setAllowsPlace(configSection.getBoolean("prevent-place"));
@@ -89,89 +98,81 @@ public class RegionSettings {
 		Logger.Log(Level.INFO, loaded + " protection stones were loaded");
 	}
 	
+	
 	// Get the loaded protection stones
-	public static List<ProtectionStone> getProtectionStones()
+	public static List<RegionCreator> getProtectionStones()
 	{
 		return protectionStones;
 	}
-	
+	*/
 	/**
-	 * Get a list of protection names
-	 * @return
-	 */
-	private static List<ConfigurationSection> getProtectionList()
-	{
-		List<ConfigurationSection> protectionNames = new ArrayList<ConfigurationSection>();
-		// Get all the protection headers
-		for(String key : BiomeProtect.getRegionConfig().getConfigurationSection("protection-stones").getKeys(false))
-		{
-			protectionNames.add(BiomeProtect.getRegionConfig().getConfigurationSection("protection-stones." + key));
-		}
-		return protectionNames;
-	}
-	
-	/**
-	 * Get the smallest protection stone
-	 * @return
-	 */
-	public static ProtectionStone getSmallestProtectionStone()
-	{
-		ProtectionStone smallest = protectionStones.get(0);
-		for(ProtectionStone pStone : protectionStones)
-		{
-			if(pStone.getRadius() < smallest.getRadius())
-			{
-				smallest = pStone;
-			}
-		}
-		
-		return smallest;
-	}
-	
-	/**
-	 * Check
+	 * Get the configuration for a protection stone in the config.
+	 * 
+	 * If the item stack has a meta display name then it is matched
+	 * with the given config meta, if no meta is found in the configs version
+	 * and the item has no display name then a true is returned
 	 * @param item
-	 * @return
+	 * @return null if no known configuration for the item is found
 	 */
-	public static boolean isProtectionStone(ItemStack item)
+	public ConfigurationSection getConfigurationSection(String node, ItemStack item)
 	{
-		for(ProtectionStone pStone : getProtectionStones())
+		for(String key : plugin.getConfig().getConfigurationSection(node).getValues(false).keySet())
 		{
-			if(item.getType() == pStone.getMaterial())
+			ConfigurationSection stone = plugin.getConfig().getConfigurationSection(node + "." + key);
+			// Check if they of same material type
+			if(stone.getString("block").equalsIgnoreCase(item.getType().name()))
 			{
-				if(pStone.hasTitle())
+				if(stone.contains("meta"))
 				{
-					if(item.hasItemMeta() && item.getItemMeta().getDisplayName().equals(pStone.getTitle()))
-					{
-						return true;
-					}
+					if(!item.hasItemMeta()) return null;
+					// Check if the item meta match the configuration meta
+					if(matchesItemMeta(stone, item.getItemMeta())) return stone;
+
+				} else
+				{
+					// Items can't be the same if it has an item meta
+					if(item.hasItemMeta()) return null;
+					// Return the configured stone otherwise
+					return stone;
 				}
 			}
 		}
 		
-		return false;
-	}
-	
-	public static ProtectionStone getProtectionStone(ItemStack item)
-	{
-		for(ProtectionStone pStone : getProtectionStones())
-		{
-			if(item.getType() == pStone.getMaterial())
-			{
-				if(pStone.hasTitle())
-				{
-					if(item.hasItemMeta() && item.getItemMeta().getDisplayName().equals(pStone.getTitle()))
-					{
-						return pStone;
-					}
-				}
-			}
-		}	
 		return null;
 	}
 	
-	public static int getInteractLimit()
+	/**
+	 * Returns whether an item correctly matches the item meta of a configuration section
+	 * @param stone
+	 * @param item
+	 * @return
+	 */
+	private static boolean matchesItemMeta(ConfigurationSection stone, ItemMeta im)
 	{
-		return BiomeProtect.getRegionConfig().getInt("interact-limit");
+		/**
+		 * First section does a title check
+		 */
+		if(stone.contains("meta.title"))
+		{
+			if(im.hasDisplayName() && !im.getDisplayName().equals(StringUtil.colorize(stone.getString("meta.title"))))
+			{
+				return false;
+			} else if(!im.hasDisplayName()) return false;
+		} else
+		{
+			if(im.hasDisplayName()) return false;
+		}
+		
+		/**
+		 * Second section checks if the lore is the same
+		 *
+		 */
+		//TODO Check lore
+		return true;
+	}
+	
+	public int getInteractLimit()
+	{
+		return plugin.getConfig().getInt("interact-limit");
 	}
 }
