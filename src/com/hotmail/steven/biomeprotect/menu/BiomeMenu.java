@@ -100,6 +100,7 @@ public class BiomeMenu implements Listener {
 		for(Button button : buttons)
 		{
 			inv.setItem(button.getPosition(), button.getIcon());
+			button.onEnable(player);
 		}
 		
 		inventories.put(player.getUniqueId(), inv);
@@ -110,12 +111,10 @@ public class BiomeMenu implements Listener {
 	@EventHandler
 	private void onInventoryClick(InventoryClickEvent evt)
 	{
-		System.out.println("click");
 		if(!(evt.getWhoClicked() instanceof Player)) return;
 		Player player = (Player)evt.getWhoClicked();
 		// Get the inventory that was clicked
 		Inventory clicked = inventories.containsKey(player.getUniqueId()) ? inventories.get(player.getUniqueId()) : null;
-		System.out.println(clicked.getTitle() + " " + evt.getInventory().getTitle());
 		// Check if we are clicking this menu
 		if(clicked != null && clicked.getTitle().equals(evt.getInventory().getTitle()))
 		{

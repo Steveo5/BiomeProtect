@@ -2,9 +2,11 @@ package com.hotmail.steven.biomeprotect.menu;
 
 import java.util.Arrays;
 
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.hotmail.steven.biomeprotect.region.ProtectedRegion;
 import com.hotmail.steven.util.StringUtil;
 
 public class Button {
@@ -72,4 +74,18 @@ public class Button {
 		return position;
 	}
 	
+	public void setLore(String lore)
+	{
+		this.lore = lore;
+	}
+	
+	/**
+	 * Called when the menu gets opened and button loaded
+	 * for a particular region
+	 * @param Player who opened the inventory
+	 */
+	public void onEnable(Player player)
+	{
+		
+	}
 }

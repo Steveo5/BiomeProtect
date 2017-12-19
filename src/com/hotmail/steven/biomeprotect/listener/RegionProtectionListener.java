@@ -43,15 +43,27 @@ public class RegionProtectionListener extends BiomeProtectListener {
 			}
 		};
 		
-		String welcome = region.hasFlag("welcome-message") ? ((StringFlag)region.getFlag("welcome-message")).getValue() : "";
-		InputButton btn2 = new InputButton("0", 1, new ItemStack(Material.PAPER), "&aWelcome message", welcome)
+		
+		InputButton btn2 = new InputButton("0", 1, new ItemStack(Material.PAPER), "&aWelcome message", "none")
 		{
 			@Override
 			public void onInput(Player player, String message)
 			{
+				// Update the welcome message flag
 				StringFlag strFlag = new StringFlag("welcome-message");
 				strFlag.setValue(message);
+				editingRegions.get(player.getUniqueId()).addFlag(strFlag);
 				menu.open(player, editingRegions.get(player.getUniqueId()));
+			}
+			
+			@Override
+			public void onEnable(Player player)
+			{
+				ProtectedRegion region = editingRegions.get(player.getUniqueId());
+				if(region.hasFlag("welcome-message"))
+				{
+					setLore(region.getFlag("welcome-message").getValue().toString());
+				}
 			}
 		};
 		menu.addButtons(btn1, btn2);
@@ -66,8 +78,8 @@ public class RegionProtectionListener extends BiomeProtectListener {
 			ProtectedRegion region = getPlugin().getRegionContainer().queryRegion(evt.getClickedBlock().getLocation());
 			if(region != null)
 			{
-				menu.open(evt.getPlayer(), region);
 				editingRegions.put(evt.getPlayer().getUniqueId(), region);
+				menu.open(evt.getPlayer(), region);
 			}
 		}
 	}

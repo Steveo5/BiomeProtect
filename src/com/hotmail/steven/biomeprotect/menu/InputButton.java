@@ -12,6 +12,8 @@ import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
+import com.hotmail.steven.biomeprotect.region.ProtectedRegion;
+
 public class InputButton extends Button {
 	
 	public InputButton(String name, int position, ItemStack icon, String title, String lore) {
@@ -29,6 +31,7 @@ public class InputButton extends Button {
 	 * after clicking this button
 	 * 
 	 * @param player
+	 * @param ProtectedRegion - region the player is managing
 	 */
 	public void onInput(Player player, String message) {}
 }
