@@ -14,14 +14,18 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.util.BlockIterator;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BlockVector;
-import org.bukkit.util.Vector;
 
 import com.hotmail.steven.biomeprotect.BiomeProtect;
 import com.hotmail.steven.biomeprotect.BlockCleanupTask;
 import com.hotmail.steven.biomeprotect.Logger;
 import com.hotmail.steven.biomeprotect.flag.RegionFlag;
+import com.hotmail.steven.biomeprotect.menubuilder.Button;
+import com.hotmail.steven.biomeprotect.menubuilder.ClickListener;
+import com.hotmail.steven.biomeprotect.menubuilder.MenuBuilder;
+import com.hotmail.steven.util.ItemUtil;
 import com.hotmail.steven.util.LocationUtil;
 
 public class ProtectedRegion extends Region {
@@ -39,6 +43,7 @@ public class ProtectedRegion extends Region {
 	private HashSet<RegionFlag<?>> flags;
 	private int priority;
 	private String name;
+	private MenuBuilder builder;
 
 	protected ProtectedRegion(String name, UUID id, UUID owner, Location center, int radius, int height)
 	{
@@ -106,7 +111,7 @@ public class ProtectedRegion extends Region {
 	 * Add a new flag to this protected regions flag list
 	 * @param flag
 	 */
-	public void addFlag(RegionFlag<?> flag)
+	public void setFlag(RegionFlag<?> flag)
 	{
 		flags.add(flag);
 	}
@@ -286,6 +291,28 @@ public class ProtectedRegion extends Region {
 		}
 		
 		new BlockCleanupTask(shownBlocks).runTaskLater(BiomeProtect.instance(), 20L * 40);
+	}
+	
+	/**
+	 * Show the editing menu for this protected region
+	 * @param player
+	 */
+	public void showMenu(Player p)
+	{
+		if(builder == null)
+		{
+			builder = new MenuBuilder();
+			builder.size(9).title("Manage protection");
+			builder.button(0, new Button(0, ItemUtil.item(Material.GLASS, 1, "&aShow area")), new ClickListener()
+			{
+				@Override
+				public void onClick(Player player)
+				{
+					show();
+				}
+			});
+		}
+		builder.show(p);
 	}
 	
 	/**

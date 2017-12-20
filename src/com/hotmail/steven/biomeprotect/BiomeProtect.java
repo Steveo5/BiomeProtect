@@ -1,22 +1,11 @@
 package com.hotmail.steven.biomeprotect;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Level;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.hotmail.steven.biomeprotect.cache.RegionCache;
 import com.hotmail.steven.biomeprotect.flag.FlagHolder;
 import com.hotmail.steven.biomeprotect.listener.BiomeProtectListener;
 import com.hotmail.steven.biomeprotect.listener.RegionCacheListener;
@@ -24,10 +13,7 @@ import com.hotmail.steven.biomeprotect.listener.RegionCreateListener;
 import com.hotmail.steven.biomeprotect.listener.RegionFlagsListener;
 import com.hotmail.steven.biomeprotect.listener.RegionProtectionListener;
 import com.hotmail.steven.biomeprotect.manager.RegionContainer;
-import com.hotmail.steven.biomeprotect.menu.ActionButton;
-import com.hotmail.steven.biomeprotect.menu.BiomeMenu;
-import com.hotmail.steven.biomeprotect.region.ProtectedRegion;
-import com.hotmail.steven.biomeprotect.region.RegionCreator;
+import com.hotmail.steven.biomeprotect.menubuilder.MenuBuilderListener;
 import com.hotmail.steven.biomeprotect.storage.RegionConfig;
 import com.hotmail.steven.biomeprotect.storage.RegionData;
 
@@ -76,6 +62,9 @@ public class BiomeProtect extends JavaPlugin {
 		{
 			getServer().getPluginManager().registerEvents(listener, this);
 		}
+		
+		// Handle events for the menu builders
+		new MenuBuilderListener(this);
 	}
 	
 	@Override
