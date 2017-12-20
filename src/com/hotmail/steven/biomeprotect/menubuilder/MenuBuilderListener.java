@@ -1,15 +1,13 @@
 package com.hotmail.steven.biomeprotect.menubuilder;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.Plugin;
 
 public class MenuBuilderListener implements Listener {
@@ -39,11 +37,43 @@ public class MenuBuilderListener implements Listener {
 				if(next.hasButton(slot))
 				{
 					Button b = next.getButton(slot);
-					if(b.hasClickListener())
+					if(b.hasListener())
 					{
 						// Run the click event
-						b.getClickListener().onClick(player);
+						b.getListener().onClick(b, player);
 						evt.setCancelled(true);
+						// Check if this is an input button
+						if(b.getListener() instanceof InputListener)
+						{
+							InputListener inputListener = (InputListener)b.getListener();
+							inputListener.waitInput(player);
+							player.closeInventory();
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onMessage(AsyncPlayerChatEvent evt)
+	{
+		Iterator<MenuBuilder> invItr = menus.iterator();
+		// Loop over all the menus we know of
+		while(invItr.hasNext())
+		{
+			MenuBuilder next = invItr.next();
+			// Check if any button is waiting input
+			for(Button btn : next.getButtons())
+			{
+				if(btn.hasListener() && btn.getListener() instanceof InputListener)
+				{
+					InputListener inputListener = (InputListener)btn.getListener();
+					// Check the button is waiting for our event player
+					if(inputListener.isWaiting() && inputListener.waiting().getUniqueId().equals(evt.getPlayer().getUniqueId()))
+					{
+						inputListener.onInput(evt.getPlayer(), evt.getMessage());
+						inputListener.stopWaiting(evt.getPlayer());
 					}
 				}
 			}

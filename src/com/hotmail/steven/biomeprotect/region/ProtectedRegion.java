@@ -14,16 +14,16 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BlockVector;
 
 import com.hotmail.steven.biomeprotect.BiomeProtect;
 import com.hotmail.steven.biomeprotect.BlockCleanupTask;
 import com.hotmail.steven.biomeprotect.Logger;
 import com.hotmail.steven.biomeprotect.flag.RegionFlag;
+import com.hotmail.steven.biomeprotect.flag.StringFlag;
 import com.hotmail.steven.biomeprotect.menubuilder.Button;
-import com.hotmail.steven.biomeprotect.menubuilder.ClickListener;
+import com.hotmail.steven.biomeprotect.menubuilder.ButtonListener;
+import com.hotmail.steven.biomeprotect.menubuilder.InputListener;
 import com.hotmail.steven.biomeprotect.menubuilder.MenuBuilder;
 import com.hotmail.steven.util.ItemUtil;
 import com.hotmail.steven.util.LocationUtil;
@@ -303,15 +303,47 @@ public class ProtectedRegion extends Region {
 		{
 			builder = new MenuBuilder();
 			builder.size(9).title("Manage protection");
-			builder.button(0, new Button(0, ItemUtil.item(Material.GLASS, 1, "&aShow area")), new ClickListener()
+			builder.button(0, new Button(0, ItemUtil.item(Material.GLASS, 1, "&aShow area")), new ButtonListener()
 			{
 				@Override
-				public void onClick(Player player)
+				public void onClick(Button button, Player player)
 				{
 					show();
 				}
 			});
+			
+			builder.button(1, new Button(1, ItemUtil.item(Material.PAPER, 1, "&7Entry message", "&3none")), new InputListener()
+			{
+				@Override
+				public void onEnable(Button button, Player player)
+				{
+					if(hasFlag("welcome-message"))
+					{
+						StringFlag welcomeFlag = (StringFlag)getFlag("welcome-message");
+						String welcomeMessage = welcomeFlag.getValue();
+						button.lore(welcomeMessage);
+						builder.update();
+					}
+				}
+				
+				@Override
+				public void onInput(Player player, String message)
+				{
+					// Create our welcome flag and set the message value
+					StringFlag welcomeFlag = new StringFlag("welcome-message");
+					welcomeFlag.setValue(message);
+					setFlag(welcomeFlag);
+					player.sendMessage("Welcome message updated");
+				}
+				
+				@Override
+				public void onClick(Button button, Player player)
+				{
+					player.sendMessage("Enter a new welcome message:");
+				}
+			});
 		}
+		
 		builder.show(p);
 	}
 	

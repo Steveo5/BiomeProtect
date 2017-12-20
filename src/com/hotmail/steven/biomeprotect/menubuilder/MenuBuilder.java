@@ -73,10 +73,10 @@ public class MenuBuilder {
 		return this;
 	}
 	
-	public MenuBuilder button(int position, Button button, ClickListener listener)
+	public MenuBuilder button(int position, Button button, ButtonListener listener)
 	{
 		button(position, button);
-		button.setClickListener(listener);
+		button.setListener(listener);
 		return this;
 	}
 	
@@ -117,15 +117,28 @@ public class MenuBuilder {
 	{
 		if(inv == null)
 			inv = Bukkit.createInventory(null, size(), StringUtil.colorize(title()));
-		inv.clear();
-		// Populate the inventory with buttons
+		update();
+		// Call the onEnable listener
 		for(Button b : buttons.values())
 		{
-			inv.setItem(b.getPosition(), b.getIcon());
+			if(b.hasListener()) b.getListener().onEnable(b, player);
 		}
 		// Listen for events in this menu
 		MenuBuilderListener.listen(this);
 		player.openInventory(inv);
+	}
+	
+	public void update()
+	{
+		if(inv != null)
+		{
+			inv.clear();
+			// Populate the inventory with buttons
+			for(Button b : buttons.values())
+			{
+				inv.setItem(b.getPosition(), b.getIcon());
+			}
+		}
 	}
 	
 	@Override
