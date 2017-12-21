@@ -2,6 +2,7 @@ package com.hotmail.steven.biomeprotect.menubuilder;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -19,6 +20,15 @@ public class MenuBuilder {
 	public MenuBuilder()
 	{
 		buttons = new HashMap<Integer, Button>();
+	}
+	
+	/**
+	 * Get the inventory created by this menu builder
+	 * @return
+	 */
+	public Inventory getInventory()
+	{
+		return inv;
 	}
 	
 	/**
@@ -109,18 +119,24 @@ public class MenuBuilder {
 		return buttons.values();
 	}
 	
+	public void build()
+	{
+		inv = Bukkit.createInventory(null, size(), StringUtil.colorize(title()));
+	}
+	
 	/**
 	 * Show the inventory for a player
 	 * @param player
 	 */
 	public void show(Player player)
 	{
-		if(inv == null)
-			inv = Bukkit.createInventory(null, size(), StringUtil.colorize(title()));
+		build();
 		update();
 		// Call the onEnable listener
-		for(Button b : buttons.values())
+		Iterator<Button> btnItr = buttons.values().iterator();
+		while(btnItr.hasNext())
 		{
+			Button b = btnItr.next();
 			if(b.hasListener()) b.getListener().onEnable(b, player);
 		}
 		// Listen for events in this menu
@@ -139,16 +155,5 @@ public class MenuBuilder {
 				inv.setItem(b.getPosition(), b.getIcon());
 			}
 		}
-	}
-	
-	@Override
-	public boolean equals(Object obj)
-	{
-		if(obj instanceof MenuBuilder)
-		{
-			MenuBuilder other = (MenuBuilder)obj;
-			if(other.title().equals(title())) return true;
-		}
-		return false;
 	}
 }

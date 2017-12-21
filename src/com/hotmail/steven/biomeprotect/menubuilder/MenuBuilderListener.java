@@ -31,7 +31,7 @@ public class MenuBuilderListener implements Listener {
 		while(invItr.hasNext())
 		{
 			MenuBuilder next = invItr.next();
-			if(next.title().equals(evt.getInventory().getTitle()))
+			if(next.getInventory().equals(evt.getInventory()))
 			{
 				// Check if the inventory has a button at the slot
 				if(next.hasButton(slot))
@@ -72,8 +72,11 @@ public class MenuBuilderListener implements Listener {
 					// Check the button is waiting for our event player
 					if(inputListener.isWaiting() && inputListener.waiting().getUniqueId().equals(evt.getPlayer().getUniqueId()))
 					{
+						// Call the event for the button
 						inputListener.onInput(evt.getPlayer(), evt.getMessage());
+						// Stop waiting for input on the button
 						inputListener.stopWaiting(evt.getPlayer());
+						evt.setCancelled(true);
 					}
 				}
 			}

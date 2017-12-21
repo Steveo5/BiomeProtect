@@ -3,7 +3,7 @@ package com.hotmail.steven.biomeprotect.flag;
 public abstract class RegionFlag<T> {
 
 	private String name;
-	private T value;
+	protected T value;
 	private String permission = "";
 	
 	public RegionFlag(String name)
