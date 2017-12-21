@@ -30,6 +30,8 @@ public class BiomeProtect extends JavaPlugin {
 	@Override
 	public void onEnable()
 	{
+		// Start the logger
+		Logger.enable(this);
 		regionData = new RegionData(this);
 		regionConfig = new RegionConfig(this);
 		listeners = new ArrayList<BiomeProtectListener>();

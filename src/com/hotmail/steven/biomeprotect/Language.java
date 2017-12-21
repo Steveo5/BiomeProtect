@@ -11,9 +11,9 @@ public class Language {
 	public static String tl(String obj, String... replacers)
 	{
 		String message = "";
-		if(obj.equals("noBreakPermission"))
+		if(obj.equals("noBuildPermission"))
 		{
-			message = "You do not have permission to break blocks here";
+			message = "&cYou cannot build here";
 		} else if(obj.equals("regionRemoved"))
 		{
 			message = "&cYou have removed the protected region";

@@ -320,18 +320,22 @@ public class ProtectedRegion extends Region {
 			}
 		});
 		
-		whitelistMenu.button(40, new Button(40, ItemUtil.item(Material.PAPER, 1, "&aCurrent page", "&eClick to add a player|&eto the whitelist")), new InputListener()
+		whitelistMenu.button(40, new Button(40, ItemUtil.item(Material.PAPER, 1, "&aWhitelist player", "&eClick to add a player|&eto the whitelist")), new InputListener()
 		{
 			@Override
 			public void onEnable(Button button, Player player)
 			{
+				// Get the whitelist iterator
 				Iterator<UUID> whitelistItr = getMembers().iterator();
 				int i=0;
+				// Update the menu, removing any old skulls
 				whitelistMenu.update();
 				while(whitelistItr.hasNext())
 				{
+					// Get our current player
 					OfflinePlayer next = Bukkit.getOfflinePlayer(whitelistItr.next());
-					whitelistMenu.button(i, new Button(39, ItemUtil.item(Material.SKULL, 1, "&a" + next.getName(), "&eClick to remove")), new ButtonListener()
+					// Create a button for the player so they can click and remove them from the whitelist
+					whitelistMenu.button(i, new Button(i, ItemUtil.item(Material.APPLE, 1, "&a" + next.getName(), "&eClick to remove")), new ButtonListener()
 					{
 						@Override
 						public void onClick(Button button, Player player)
@@ -353,7 +357,7 @@ public class ProtectedRegion extends Region {
 			@Override
 			public void onInput(Player player, String message)
 			{
-				OfflinePlayer whitelist = Bukkit.getOfflinePlayer(message);
+				OfflinePlayer whitelist = Bukkit.getPlayer(message);
 				if(whitelist != null)
 				{
 					addMember(whitelist.getUniqueId());
@@ -617,9 +621,24 @@ public class ProtectedRegion extends Region {
 		return uuid.equals(owner);
 	}
 	
+	/**
+	 * Checks if a UUID owns this region
+	 * @param uuid
+	 * @return
+	 */
 	public boolean isOwner(UUID uuid)
 	{
 		return uuid.equals(owner);
+	}
+	
+	/**
+	 * Checks if a player owns this region
+	 * @param player
+	 * @return
+	 */
+	public boolean isOwner(Player player)
+	{
+		return player.getUniqueId().equals(owner);
 	}
 	
 	/**
@@ -641,6 +660,15 @@ public class ProtectedRegion extends Region {
 	}
 	
 	/**
+	 * Add a member to this region
+	 * @param player
+	 */
+	public void addMember(Player player)
+	{
+		members.add(player.getUniqueId());
+	}
+	
+	/**
 	 * Check if the region has a member
 	 * @param member
 	 * @return
@@ -648,6 +676,16 @@ public class ProtectedRegion extends Region {
 	public boolean hasMember(UUID member)
 	{
 		return members.contains(member);
+	}
+	
+	/**
+	 * Check if the region has a member/is whitelisted
+	 * @param player
+	 * @return
+	 */
+	public boolean hasMember(Player player)
+	{
+		return members.contains(player.getUniqueId());
 	}
 	
 	public void removeMember(UUID member)

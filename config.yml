@@ -1,20 +1,12 @@
-# General configuration
+# ------------------------------------------------ #
+#              General configuration               #
+# ------------------------------------------------ #
 # Configure how many times players can interact per second
 interact-limit: 1
 
-# Change how the menu appears, valid button type are the flags,
-# break,place,pvp,entry,leave,tnt,listbuilders,addbuilder,removebuilder
-# The string should be - type:slot:displayname:lore (can be seperated by _)
-# Valid replacers are %player%, %value%
-menu:
-  main:
-    title: '&c&lManage protected region'
-    buttons:
-      - 'break:0:&3Allow break:&6Currently &c%value%'
-      - 'place:0:&3Allow place:&6Currently &c%value%'
-      - 'pvp:0:&3Allow pvp:&6Currently &c%value%'
-      - 'entry:0:&3Entry message:&7%value%'
-      - 'leave:0:&Leave message:&7%value%'
+# Logging - this section defines whether or not to log to the log.txt file
+logging:
+  enabled: true
 
 # Configure custom protection stones here
 protection-stones:

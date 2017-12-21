@@ -1,8 +1,10 @@
 package com.hotmail.steven.biomeprotect.menubuilder;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -132,11 +134,10 @@ public class MenuBuilder {
 	{
 		build();
 		update();
+		List<Button> buttonList = new ArrayList<Button>(buttons.values());
 		// Call the onEnable listener
-		Iterator<Button> btnItr = buttons.values().iterator();
-		while(btnItr.hasNext())
+		for(Button b : buttonList)
 		{
-			Button b = btnItr.next();
 			if(b.hasListener()) b.getListener().onEnable(b, player);
 		}
 		// Listen for events in this menu
