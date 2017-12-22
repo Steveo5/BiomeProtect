@@ -47,7 +47,13 @@ public class RegionCreateListener extends BiomeProtectListener {
 			// Set the optional values
 			if(stoneConfig.contains("meta.title")) regionCreator.title(stoneConfig.getString("meta.title"));
 			if(stoneConfig.contains("meta.lore")) regionCreator.lore(stoneConfig.getStringList("meta.lore"));
-			if(stoneConfig.contains("height")) regionCreator.height(stoneConfig.getInt("height"));
+			if(stoneConfig.contains("height")) 
+			{
+				regionCreator.height(stoneConfig.getInt("height"));
+			} else
+			{
+				regionCreator.height(regionCreator.radius());
+			}
 			//TODO set the priority
 			ProtectedRegion region = regionCreator.createRegion(player.getUniqueId(), evt.getBlock().getLocation());
 			// Get highest priority region intercepting this region

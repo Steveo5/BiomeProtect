@@ -335,12 +335,13 @@ public class ProtectedRegion extends Region {
 					// Get our current player
 					OfflinePlayer next = Bukkit.getOfflinePlayer(whitelistItr.next());
 					// Create a button for the player so they can click and remove them from the whitelist
-					whitelistMenu.button(i, new Button(i, ItemUtil.item(Material.APPLE, 1, "&a" + next.getName(), "&eClick to remove")), new ButtonListener()
+					whitelistMenu.button(i, new Button(i, ItemUtil.item(Material.APPLE, 1, "&a" + next.getName(), "&eClick to remove")), new ButtonListener(next.getUniqueId())
 					{
 						@Override
 						public void onClick(Button button, Player player)
 						{
-							player.sendMessage("Removing " + next.getName());
+							removeMember((UUID)getData()[0]);
+							whitelistMenu.removeButton(button.getPosition());
 						}
 					});
 					i++;

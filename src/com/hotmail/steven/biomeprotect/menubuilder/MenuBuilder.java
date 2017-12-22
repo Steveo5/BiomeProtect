@@ -121,6 +121,17 @@ public class MenuBuilder {
 		return buttons.values();
 	}
 	
+	/**
+	 * Removes a button and updates the inventory at
+	 * a specified position
+	 * @param position
+	 */
+	public void removeButton(int position)
+	{
+		buttons.remove(position);
+		update();
+	}
+	
 	public void build()
 	{
 		inv = Bukkit.createInventory(null, size(), StringUtil.colorize(title()));

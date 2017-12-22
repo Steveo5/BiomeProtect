@@ -56,7 +56,7 @@ public class RegionProtectionListener extends BiomeProtectListener {
 			Player p = evt.getPlayer();
 			// Get the highest priority region as higher priorities override lower ones
 			ProtectedRegion region = regions.getHighestPriority();
-			if(!region.isOwner(p) || !region.hasMember(p))
+			if(!region.isOwner(p) && !region.hasMember(p))
 			{
 				evt.setCancelled(true);
 				tl(p, "noBuildPermission");
@@ -74,18 +74,12 @@ public class RegionProtectionListener extends BiomeProtectListener {
 			Player p = evt.getPlayer();
 			// Get the highest priority region as higher priorities override lower ones
 			ProtectedRegion region = regions.getHighestPriority();
-			if(!region.isOwner(p) || !region.hasMember(p))
+			if(!region.isOwner(p) && !region.hasMember(p))
 			{
 				evt.setCancelled(true);
 				tl(p, "noBuildPermission");
 			}
 		}
-	}
-	
-	@EventHandler (priority=EventPriority.LOW)
-	public void onLiquidFlow(BlockFromToEvent evt)
-	{
-		
 	}
 	
 }
