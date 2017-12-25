@@ -6,12 +6,17 @@ import java.util.UUID;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 import com.hotmail.steven.biomeprotect.BiomeProtect;
 import com.hotmail.steven.biomeprotect.ProtectedRegionList;
+import com.hotmail.steven.biomeprotect.flag.StateFlag;
 import com.hotmail.steven.biomeprotect.flag.StringFlag;
 import com.hotmail.steven.biomeprotect.region.ProtectedRegion;
+
+import static com.hotmail.steven.biomeprotect.Language.tl;
 
 public class RegionFlagsListener extends BiomeProtectListener {
 
@@ -89,6 +94,43 @@ public class RegionFlagsListener extends BiomeProtectListener {
 		{
 			StringFlag leave = (StringFlag)region.getFlag("leave-message");
 			player.sendMessage(leave.getValue());
+		}
+	}
+	
+	@EventHandler
+	public void onPvp(EntityDamageByEntityEvent evt) {
+		if(evt.getEntity() instanceof Player && evt.getDamager() instanceof Player)
+		{
+			Player p = (Player)evt.getEntity();
+			Player d = (Player)evt.getDamager();
+			// Get regions at the damaged player
+			ProtectedRegionList atPlayer = getPlugin().getRegionContainer().queryRegions(p.getLocation());
+			if(!atPlayer.isEmpty())
+			{
+				// Get the highest priority event
+				ProtectedRegion highest = atPlayer.getHighestPriority();
+				if(highest.hasFlag("pvp"))
+				{
+					// Get the stateflag that can have whitelist, allow, deny
+					StateFlag pvpFlag = (StateFlag)highest.getFlag("pvp");
+					// Examine the states
+					if(pvpFlag.getValue().equalsIgnoreCase("deny") || (pvpFlag.getValue().equalsIgnoreCase("whitelist") && !highest.hasMember(d)))
+					{
+						tl(d, "noPvp");
+						evt.setCancelled(true);
+					}
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onTntPlace(BlockPlaceEvent evt)
+	{
+		ProtectedRegionList atBlock = getPlugin().getRegionContainer().queryRegions(evt.getBlock().getLocation());
+		if(!atBlock.isEmpty())
+		{
+			ProtectedRegion highest = atBlock.getHighestPriority();
 		}
 	}
 

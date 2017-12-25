@@ -32,6 +32,9 @@ public class Language {
 		} else if(obj.equals("regionPlaced"))
 		{
 			message =  "&6You have placed a new region at &cx %x% y %y% z %z%";
+		} else if(obj.equals("noPvp"))
+		{
+			message = "&cYou cannot attack other players here";
 		}
 		return replacers(StringUtil.colorize(message), replacers);
 	}
