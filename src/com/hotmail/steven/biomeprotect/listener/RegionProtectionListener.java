@@ -40,8 +40,14 @@ public class RegionProtectionListener extends BiomeProtectListener {
 			ProtectedRegion region = getPlugin().getRegionContainer().queryRegion(evt.getClickedBlock().getLocation());
 			if(region != null)
 			{
-				editingRegions.put(evt.getPlayer().getUniqueId(), region);
-				region.showMenu(evt.getPlayer());
+				if(region.isOwner(evt.getPlayer()))
+				{
+					editingRegions.put(evt.getPlayer().getUniqueId(), region);
+					region.showMenu(evt.getPlayer());
+				} else
+				{
+					tl(evt.getPlayer(), "noPermission");
+				}
 			}
 		}
 	}

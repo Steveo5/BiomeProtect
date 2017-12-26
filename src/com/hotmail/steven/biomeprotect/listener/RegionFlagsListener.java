@@ -3,9 +3,12 @@ package com.hotmail.steven.biomeprotect.listener;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -127,10 +130,70 @@ public class RegionFlagsListener extends BiomeProtectListener {
 	@EventHandler
 	public void onTntPlace(BlockPlaceEvent evt)
 	{
+		if(evt.getBlock().getType() != Material.TNT) return;
+		// Get all regions at the block
 		ProtectedRegionList atBlock = getPlugin().getRegionContainer().queryRegions(evt.getBlock().getLocation());
 		if(!atBlock.isEmpty())
 		{
+			// Get the highest priority region
 			ProtectedRegion highest = atBlock.getHighestPriority();
+			Player p = evt.getPlayer();
+			if(highest.hasFlag("tnt"))
+			{
+				StateFlag tntFlag = (StateFlag)highest.getFlag("tnt");
+				// Tnt flag is set to deny or player is not on the whitelist and the flag is whitelist
+				if(tntFlag.getValue().equals("deny") || (tntFlag.getValue().equals("whitelist") && !highest.hasMember(p)))
+				{
+					evt.setCancelled(true);
+					tl(p, "noBuildPermission");
+				}
+			}
+		}
+	}
+	
+	@EventHandler (priority = EventPriority.HIGH)
+	public void onBlockPlace(BlockPlaceEvent evt)
+	{
+		// Get ll regions at the block
+		ProtectedRegionList atBlock = getPlugin().getRegionContainer().queryRegions(evt.getBlock().getLocation());
+		if(!atBlock.isEmpty())
+		{
+			Player p = evt.getPlayer();
+			// Get the highest priority region
+			ProtectedRegion highest = atBlock.getHighestPriority();
+			if(highest.hasFlag("build"))
+			{
+				StateFlag buildFlag = (StateFlag)highest.getFlag("build");
+				// Build flag is set to deny or player is not on the whitelist and the flag is whitelist
+				if(buildFlag.getValue().equals("deny") || (buildFlag.getValue().equals("whitelist") && !highest.hasMember(p)))
+				{
+					evt.setCancelled(true);
+					tl(p, "noBuildPermission");
+				}
+			}
+		}
+	}
+	
+	@EventHandler (priority = EventPriority.HIGH)
+	public void onBlockBreak(BlockBreakEvent evt)
+	{
+		// Get all regions at the block
+		ProtectedRegionList atBlock = getPlugin().getRegionContainer().queryRegions(evt.getBlock().getLocation());
+		if(!atBlock.isEmpty())
+		{
+			Player p = evt.getPlayer();
+			// Get the highest priority region
+			ProtectedRegion highest = atBlock.getHighestPriority();
+			if(highest.hasFlag("break"))
+			{
+				StateFlag buildFlag = (StateFlag)highest.getFlag("break");
+				// Build flag is set to deny or player is not on the whitelist and the flag is whitelist
+				if(buildFlag.getValue().equals("deny") || (buildFlag.getValue().equals("whitelist") && !highest.hasMember(p)))
+				{
+					evt.setCancelled(true);
+					tl(p, "noBuildPermission");
+				}
+			}
 		}
 	}
 

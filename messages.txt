@@ -1,0 +1,6 @@
+noBuildPermission=&cYou have no permission to build here
+regionRemoved=&cThe region has been removed
+playerOnly=&cOnly players can execute this command
+regionDoesntExist=&cNo protected regions exist here
+regionPlaced=&6You have placed a new region at &cx %x% y %y% z %z%
+noPvp=&cYou cannot attack other players here

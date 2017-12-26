@@ -21,59 +21,28 @@ import com.hotmail.steven.biomeprotect.region.RegionCreator;
 import com.mysql.jdbc.Connection;
 
 public class RegionData {
-
-	private File cfgFile;
-	private FileConfiguration cfg;
-	// Hold mysql connection
-	private Connection connection;
-	// Hold mysql database details
-	private String host, database, username, password;
-	private int port;
+	
+	// Hold our connection
+	private IConnection connection = null;
 	private BiomeProtect plugin;
 	
 	public RegionData(BiomeProtect plugin)
 	{
 		if(RegionConfig.getStorageType().equals("mysql"))
 		{
-			host = RegionConfig.getMysqlUrl();
-			username = RegionConfig.getMysqlUser();
-			database = RegionConfig.getMysqlDb();
-			password = RegionConfig.getMysqlPass();
-			port = RegionConfig.getMysqlPort();
+			String host = RegionConfig.getMysqlUrl();
+			String username = RegionConfig.getMysqlUser();
+			String database = RegionConfig.getMysqlDb();
+			String password = RegionConfig.getMysqlPass();
+			int port = RegionConfig.getMysqlPort();
 			
-	        try {    
-	            openConnection(); 
-	            Logger.Log(Level.INFO, "Database connection was succesful");
-	            createDefaultTables();
-	        } catch (ClassNotFoundException e) {
-	            e.printStackTrace();
-	        } catch (SQLException e) {
-	            e.printStackTrace();
-	        }
+			connection = new MysqlConnection(plugin, username, password, host, database, port);
 		}
-	}
-	
-	private void openConnection() throws SQLException, ClassNotFoundException {
-	    if (connection != null && !connection.isClosed()) {
-	        return;
-	    }
-	 
-	    synchronized (this) {
-	        if (connection != null && !connection.isClosed()) {
-	            return;
-	        }
-	        Class.forName("com.mysql.jdbc.Driver");
-	        connection = (Connection) DriverManager.getConnection("jdbc:mysql://" + this.host+ ":" + this.port + "/" + this.database, this.username, this.password);
-	    }
-	}
-	
-	private void createDefaultTables()
-	{
-		try { 
-			Statement stmt = connection.createStatement();
-			createRegionTable(stmt);
-		} catch (SQLException e) {
-			e.printStackTrace();
+		
+		// Load all regions
+		if(connection != null)
+		{
+			connection.loadRegions();
 		}
 	}
 	
@@ -228,34 +197,6 @@ public class RegionData {
 	}
 	
 	/**
-	 * Check if a region exists in the database
-	 * @param id
-	 * @return
-	 */
-	public boolean hasRegion(int id)
-	{
-		Statement stmt = null;
-		try
-		{
-			stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT * FROM cuboids WHERE cuboid_id=" + id);
-			return rs.next();
-		} catch(SQLException e)
-		{
-			e.printStackTrace();
-		} finally
-		{
-			if(stmt != null)
-				try {
-					stmt.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-		}
-		return false;
-	}
-	
-	/**
 	 * Saves a region to the database
 	 * @param region
 	 * @param create - specify if this is the first time
@@ -321,6 +262,7 @@ public class RegionData {
 	 */
 	public void removeRegion(UUID id)
 	{
+		/*
 		try
 		{
 			Statement stmt = connection.createStatement();
@@ -336,6 +278,7 @@ public class RegionData {
 		{
 			e.printStackTrace();
 		}
+		*/
 	}
 	
 }

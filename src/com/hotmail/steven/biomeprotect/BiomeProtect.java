@@ -32,7 +32,8 @@ public class BiomeProtect extends JavaPlugin {
 	{
 		// Start the logger
 		Logger.enable(this);
-		regionData = new RegionData(this);
+		// Enable the language file
+		Language.enable(this);
 		regionConfig = new RegionConfig(this);
 		listeners = new ArrayList<BiomeProtectListener>();
 		menu = new RegionMenu();
@@ -46,7 +47,6 @@ public class BiomeProtect extends JavaPlugin {
 		
 		regionContainer = new RegionContainer(this);
 		
-		Logger.Log(Level.INFO, "Loading regions shortly...");
 		//regionData.loadRegions();
 		flagHolder = new FlagHolder();
 		// Initialize the listeners
@@ -67,12 +67,14 @@ public class BiomeProtect extends JavaPlugin {
 		
 		// Handle events for the menu builders
 		new MenuBuilderListener(this);
+		
+		regionData = new RegionData(this);
 	}
 	
 	@Override
 	public void onDisable()
 	{
-		Logger.Log(Level.INFO, "Saving all regions to the database");
+		//Logger.Log(Level.INFO, "Saving all regions to the database");
 		//TODO save regions to database
 	}
 	

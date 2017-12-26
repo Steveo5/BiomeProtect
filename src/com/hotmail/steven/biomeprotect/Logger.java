@@ -28,6 +28,7 @@ public class Logger {
 	{
 		filePath = plugin.getDataFolder() + File.separator + "log.txt";		
 		dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		Logger.Log(Level.INFO, "Enabling the logger");
 		// Load from config whether we will enable logging to file
 		if(plugin.getConfig().isBoolean("logging.enabled"))
 		{
