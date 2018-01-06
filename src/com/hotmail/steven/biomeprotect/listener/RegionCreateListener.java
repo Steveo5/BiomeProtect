@@ -55,7 +55,7 @@ public class RegionCreateListener extends BiomeProtectListener {
 				regionCreator.height(regionCreator.radius());
 			}
 			//TODO set the priority
-			ProtectedRegion region = regionCreator.createRegion(player.getUniqueId(), evt.getBlock().getLocation());
+			ProtectedRegion region = regionCreator.createRegion(player.getUniqueId(), evt.getBlock().getLocation(), evt.getBlock().getType());
 			// Get highest priority region intercepting this region
 			ProtectedRegionList intercepting = getPlugin().getRegionContainer().queryRegions(region);
 			// Add one to the highest priority for this region
@@ -66,6 +66,8 @@ public class RegionCreateListener extends BiomeProtectListener {
 			Location blockLoc = evt.getBlock().getLocation();
 			player.sendMessage(tl("regionPlaced", new String[] {"%x%", String.valueOf(blockLoc.getBlockX()), "%y%", String.valueOf(blockLoc.getBlockY()),
 					"%z%", String.valueOf(blockLoc.getBlockZ())}));
+			// Finally save the region to database
+			getPlugin().getRegionData().getConnection().saveRegion(region);
 		}
 	}
 	
@@ -79,6 +81,8 @@ public class RegionCreateListener extends BiomeProtectListener {
 			// Delete the region
 			getPlugin().getRegionContainer().removeRegion(region);
 			tl(evt.getPlayer(), "regionRemoved");
+			// Remove from the database
+			getPlugin().getRegionData().getConnection().removeRegion(region.getId());
 		}
 	}
 	

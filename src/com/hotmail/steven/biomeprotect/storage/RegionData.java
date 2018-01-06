@@ -23,7 +23,7 @@ import com.mysql.jdbc.Connection;
 public class RegionData {
 	
 	// Hold our connection
-	private IConnection connection = null;
+	private DataConnection connection = null;
 	private BiomeProtect plugin;
 	
 	public RegionData(BiomeProtect plugin)
@@ -46,83 +46,14 @@ public class RegionData {
 		}
 	}
 	
-	private void createRegionTable(Statement stmt)
+	/**
+	 * Get the physical connection to the data. Common method include
+	 * saving, loading and removing regions
+	 * @return instance of DataConnection
+	 */
+	public DataConnection getConnection()
 	{
-		try {
-			stmt.execute("CREATE TABLE IF NOT EXISTS cuboids (cuboid_id VARCHAR(60) PRIMARY KEY NOT NULL,"
-					+ " owner VARCHAR(60) NOT NULL,"
-					+ " x INT(6) NOT NULL,"
-					+ " y INT (6) NOT NULL,"
-					+ " z INT(6) NOT NULL,"
-					+ " world VARCHAR(60) NOT NULL,"
-					+ " name VARCHAR(60) NOT NULL,"
-					+ " material VARCHAR(30) NOT NULL,"
-					+ " data INT(6) NOT NULL,"
-					+ " radius INT(6) NOT NULL"
-					+ ")");
-			createFlagTable(stmt);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	private void createFlagTable(Statement stmt)
-	{
-		try
-		{
-			stmt.execute("CREATE TABLE IF NOT EXISTS flags (flag_id INT(6) PRIMARY KEY,"
-					+ "flag_name VARCHAR(30))");
-			
-			ResultSet rs = stmt.executeQuery("SELECT * FROM flags");
-			if(!rs.next())
-			{
-				stmt.execute("INSERT INTO flags (flag_id, flag_name) VALUES (1, 'pvp')");
-				stmt.execute("INSERT INTO flags (flag_id, flag_name) VALUES (2, 'entry_message')");
-				stmt.execute("INSERT INTO flags (flag_id, flag_name) VALUES (3, 'exit_message')");
-				stmt.execute("INSERT INTO flags (flag_id, flag_name) VALUES (4, 'tnt')");
-				stmt.execute("INSERT INTO flags (flag_id, flag_name) VALUES (5, 'break')");
-				stmt.execute("INSERT INTO flags (flag_id, flag_name) VALUES (6, 'place')");
-			}
-			createRegionFlagTable(stmt);
-		} catch(SQLException e)
-		{
-			e.printStackTrace();
-		}
-	}
-	
-	private void createRegionFlagTable(Statement stmt)
-	{
-		try
-		{
-			stmt.execute("CREATE TABLE IF NOT EXISTS cuboid_flags (cuboid_id VARCHAR(60),"
-					+ " FOREIGN KEY (cuboid_id) REFERENCES cuboids(cuboid_id),"
-					+ " flag_id INT(6),"
-					+ " FOREIGN KEY (flag_id) REFERENCES flags(flag_id),"
-					+ " PRIMARY KEY(cuboid_id, flag_id),"
-					+ " value VARCHAR(60),"
-					+ " enabled TINYINT(1))");
-		} catch(SQLException e)
-		{
-			e.printStackTrace();
-		}
-		
-		createBuildersTable(stmt);
-	}
-	
-	private void createBuildersTable(Statement stmt)
-	{
-		try
-		{
-			stmt.execute("CREATE TABLE IF NOT EXISTS players (builder_id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
-					+ " uuid VARCHAR(40),"
-					+ " cuboid_id VARCHAR(60),"
-					+ " FOREIGN KEY (cuboid_id) REFERENCES cuboids(cuboid_id))");
-			stmt.close();
-		} catch(SQLException e)
-		{
-			e.printStackTrace();
-		}
+		return connection;
 	}
 	
 	/*
@@ -201,7 +132,7 @@ public class RegionData {
 	 * @param region
 	 * @param create - specify if this is the first time
 	 * this protection stone is being entered into the db
-	 */
+	 
 	public void saveRegion(ProtectedRegion region, boolean create)
 	{
 		UUID owner = region.getOwner();
@@ -211,6 +142,7 @@ public class RegionData {
 		UUID world = region.getWorld().getUID();
 		UUID id = region.getId();
 	}
+	*/
 		/*
 		String name = region.getName();
 		String mat = region.getMaterial().name();
@@ -260,8 +192,8 @@ public class RegionData {
 	 * Remove a region from the database
 	 * @param id
 	 */
-	public void removeRegion(UUID id)
-	{
+	//public void removeRegion(UUID id)
+	//{
 		/*
 		try
 		{
@@ -279,6 +211,6 @@ public class RegionData {
 			e.printStackTrace();
 		}
 		*/
-	}
+	//}
 	
 }

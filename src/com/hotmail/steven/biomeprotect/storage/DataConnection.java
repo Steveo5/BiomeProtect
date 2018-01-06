@@ -4,15 +4,15 @@ import java.util.UUID;
 
 import com.hotmail.steven.biomeprotect.region.ProtectedRegion;
 
-public interface IConnection {
-
+public interface DataConnection {
+	
 	/**
 	 * Save a particular region to the database
 	 * @param region
 	 */
 	void saveRegion(ProtectedRegion region);
 	/**
-	 * Loads all regions on server start
+	 * Loads all regions on server start into memory
 	 */
 	void loadRegions();
 	/**

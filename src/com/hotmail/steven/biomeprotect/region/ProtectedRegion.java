@@ -50,9 +50,10 @@ public class ProtectedRegion extends Region {
 	private HashSet<RegionFlag<?>> flags;
 	private int priority;
 	private String name;
+	private Material material;
 	private MenuBuilder mainMenu, flagsMenu, whitelistMenu;
 
-	protected ProtectedRegion(String name, UUID id, UUID owner, Location center, int radius, int height)
+	protected ProtectedRegion(String name, Material material, UUID id, UUID owner, Location center, int radius, int height)
 	{
 		super(center, radius, height);
 		this.name = name;
@@ -61,6 +62,7 @@ public class ProtectedRegion extends Region {
 		members = new HashSet<UUID>();
 		this.owner = owner;
 		this.id = id;
+		this.material = material;
 		// Get existing chunks this region resides
 		chunks = LocationUtil.getAllChunks(getWorld(), getSmallerPoint(), getLargerPoint());
 		Logger.Log(Level.INFO, Bukkit.getOfflinePlayer(owner).getName() + " placed a field at " + center.getBlockX() + " " + center.getBlockY() + " " + center.getBlockZ());
@@ -488,6 +490,11 @@ public class ProtectedRegion extends Region {
 	public World getWorld()
 	{
 		return getCenter().getWorld();
+	}
+	
+	public Material getMaterial()
+	{
+		return material;
 	}
 	
 	/**

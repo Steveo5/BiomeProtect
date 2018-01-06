@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.hotmail.steven.biomeprotect.flag.FlagHolder;
@@ -14,6 +15,7 @@ import com.hotmail.steven.biomeprotect.listener.RegionFlagsListener;
 import com.hotmail.steven.biomeprotect.listener.RegionProtectionListener;
 import com.hotmail.steven.biomeprotect.manager.RegionContainer;
 import com.hotmail.steven.biomeprotect.menubuilder.MenuBuilderListener;
+import com.hotmail.steven.biomeprotect.region.RegionSaveTask;
 import com.hotmail.steven.biomeprotect.storage.RegionConfig;
 import com.hotmail.steven.biomeprotect.storage.RegionData;
 
@@ -26,6 +28,7 @@ public class BiomeProtect extends JavaPlugin {
 	private RegionConfig regionConfig;
 	private RegionContainer regionContainer;
 	private List<BiomeProtectListener> listeners;
+	private RegionSaveTask regionSaveTask;
 	
 	@Override
 	public void onEnable()
@@ -67,8 +70,10 @@ public class BiomeProtect extends JavaPlugin {
 		
 		// Handle events for the menu builders
 		new MenuBuilderListener(this);
-		
+	
 		regionData = new RegionData(this);
+		regionSaveTask = new RegionSaveTask(this);
+		Bukkit.getScheduler().runTaskTimer(this, regionSaveTask, 20L * 10L, 20L * getConfig().getInt("database.interval.seconds"));
 	}
 	
 	@Override

@@ -163,12 +163,12 @@ public class RegionCreator {
 	 * @param owner
 	 * @return
 	 */
-	public ProtectedRegion createRegion(UUID owner, Location location)
+	public ProtectedRegion createRegion(UUID owner, Location location, Material material)
 	{
 		// Generate new id for the region
 		UUID id = UUID.randomUUID();
 		// Create the region instance
-		ProtectedRegion region = new ProtectedRegion(name, id, owner, location, radius(), height());
+		ProtectedRegion region = new ProtectedRegion(name, material, id, owner, location, radius(), height());
 		return region;
 	}
 	

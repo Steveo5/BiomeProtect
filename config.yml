@@ -34,3 +34,34 @@ protection-stones:
     prevent-break: true
     welcome-message: 'Entered %player%s protection'
     leave-message: 'Left %players%s protection'
+    
+####################################################
+# ------------------------------------------------ #
+#              Database configuration              #
+# ------------------------------------------------ #
+####################################################
+database:
+  # Here you can configure mysql, sqllite or flatfile
+  # mysql is recomended as it will be faster with larger databases
+  type: mysql
+  # Time between saving the region data to the database
+  interval:
+    seconds: 10
+  # Configure the connection type
+  settings:
+    # Configure the mysql settings
+    mysql:
+      user: root
+      password: pass
+      database: regions
+      table_prefix: cuboid_
+      address: localhost
+      port: 3306
+    # Configure the sql lite settings  
+    sqllite:
+      # File name for the database
+      file_name: regions
+    # Configure the flatfile settings
+    flatfile:
+      # File name for the flatfile database
+      file_name: regions
