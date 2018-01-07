@@ -4,6 +4,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -24,7 +25,11 @@ public class MysqlConnection implements DataConnection {
 	private int port;
 	private Connection connection;
 	private BiomeProtect plugin;
-	private String cuboidsTable = "CREATE TABLE IF NOT EXISTS cuboids (cuboid_id VARCHAR(60) PRIMARY KEY NOT NULL,"
+	
+	/**
+	 * Queries that create the tables
+	 */
+	private final String cuboidsTable = "CREATE TABLE IF NOT EXISTS cuboids (cuboid_id VARCHAR(60) PRIMARY KEY NOT NULL,"
 			+ " owner VARCHAR(60) NOT NULL,"
 			+ " x INT(6) NOT NULL,"
 			+ " y INT (6) NOT NULL,"
@@ -35,16 +40,43 @@ public class MysqlConnection implements DataConnection {
 			+ " data INT(6) NOT NULL,"
 			+ " radius INT(6) NOT NULL"
 			+ ")";
-	private String flagsTable = "CREATE TABLE IF NOT EXISTS cuboid_flags (cuboid_id VARCHAR(60),"
+	private final String flagsTable = "CREATE TABLE IF NOT EXISTS cuboid_flags (cuboid_id VARCHAR(60),"
 			+ " FOREIGN KEY (cuboid_id) REFERENCES cuboids(cuboid_id),"
-			+ " flag_name VARCHAR(36),"
+			+ " flag_name VARCHAR(36) NOT NULL,"
 			+ " PRIMARY KEY(cuboid_id, flag_name),"
-			+ " value VARCHAR(60),"
+			+ " value VARCHAR(60) NOT NULL,"
 			+ " enabled TINYINT(1))";
-	private String whitelistTable = "CREATE TABLE IF NOT EXISTS cuboid_whitelist (whitelist_id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
-			+ " uuid VARCHAR(40),"
+	private final String whitelistTable = "CREATE TABLE IF NOT EXISTS cuboid_whitelist ("
+			+ "uuid VARCHAR(40),"
 			+ " cuboid_id VARCHAR(60),"
-			+ " FOREIGN KEY (cuboid_id) REFERENCES cuboids(cuboid_id))";
+			+ " FOREIGN KEY (cuboid_id) REFERENCES cuboids(cuboid_id),"
+			+ " PRIMARY KEY (uuid, cuboid_id))";
+	
+	/**
+	 * Queries that retrieve information
+	 */
+	private final String showCuboidsTable = "SHOW TABLES LIKE 'cuboids'";
+	private final String showFlagsTable = "SHOW TABLES LIKE 'cuboid_flags'";
+	private final String showWhitelistedTable = "SHOW TABLES LIKE 'cuboid_whitelist'";
+	private final String existingCuboids = "SELECT * FROM cuboids WHERE cuboid_id LIKE ''{0}''";
+	
+	/**
+	 * Queries that insert or update information
+	 */
+	// Create the update/create flag query
+	private final String insertFlag = "INSERT INTO cuboid_flags (cuboid_id,flag_name,value,enabled) VALUES ("
+			+ "''{0}'',''{1}'',''{2}'',1)"
+			+ " ON DUPLICATE KEY UPDATE value = VALUES(value)";
+	private final String insertRegion = "INSERT INTO cuboids (cuboid_id,owner,x,y,z,world,name,material,data,radius) VALUES "
+			+ "(''{0}'',''{1}'',{2},{3},{4},''{5}'',''{6}'',''{7}'',0,{8})";
+	private final String insertWhitelist = "INSERT INTO cuboid_whitelist (uuid, cuboid_id) VALUES (''{0}'', ''{1}'')"
+			+ " ON DUPLICATE KEY IGNORE";
+	
+	/**
+	 * Queries that remove information
+	 */
+	private final String removeRegion = "DELETE FROM cuboids WHERE cuboid_id LIKE ''{0}''";
+	private final String removeFlag = "DELETE FROM cuboid_flags WHERE (cuboid_id,flag_name) LIKE (''{0}'',''{1}'')";
 	
 	public MysqlConnection(BiomeProtect plugin, String user, String pass, String host, String db, int port)
 	{
@@ -98,14 +130,14 @@ public class MysqlConnection implements DataConnection {
 	{
 		try { 
 			Statement stmt = connection.createStatement();
-			ResultSet cuboidsTable = stmt.executeQuery("SHOW TABLES LIKE 'cuboids'");
+			ResultSet cuboidsTable = stmt.executeQuery(showCuboidsTable);
 			// Check if the cuboids table exists and if not create it
 			if(!cuboidsTable.next())
 			{
 				Logger.Log(Level.INFO, "Creating table cuboids");
 				stmt.execute(this.cuboidsTable);
 				
-				ResultSet flagsTable = stmt.executeQuery("SHOW TABLES LIKE 'cuboid_flags'");
+				ResultSet flagsTable = stmt.executeQuery(showFlagsTable);
 				// Check if the cuboid_flags table exists and if not create its
 				if(!flagsTable.next())
 				{
@@ -113,7 +145,7 @@ public class MysqlConnection implements DataConnection {
 					stmt.execute(this.flagsTable);
 				}
 				
-				ResultSet buildersTable = stmt.executeQuery("SHOW TABLES LIKE 'cuboid_whitelist'");
+				ResultSet buildersTable = stmt.executeQuery(showWhitelistedTable);
 				// Check if the cuboid_whitelisted table exists and if not create it
 				if(!buildersTable.next())
 				{
@@ -131,10 +163,9 @@ public class MysqlConnection implements DataConnection {
 		
 		Location center = region.getCenter();
 		// Query to insert the region into the database
-		final String insertRegion = "INSERT INTO cuboids (cuboid_id,owner,x,y,z,world,name,material,data,radius) VALUES "
-			+ "('" + region.getId().toString() + "','" + region.getOwner().toString() + "'," + center.getBlockX()
-			+ "," + center.getBlockY() + "," + center.getBlockZ() + ",'" + region.getWorld().getUID().toString() + "',"
-			+ "'" + region.getName() + "','" + region.getMaterial().name().toLowerCase() + "',0," + region.getRadius() + ")";
+		final String insertRegion = MessageFormat.format(this.insertRegion, region.getId().toString(), region.getOwner().toString(), 
+				center.getBlockX(), center.getBlockY(), center.getBlockZ(), region.getWorld().toString(), region.getName(), 
+				region.getMaterial().name().toLowerCase(), region.getRadius());
 		// Copy the array as to not cause access exception
 		final HashSet<RegionFlag<?>> flags = new HashSet<RegionFlag<?>>(region.getFlags());
 		Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable()
@@ -145,7 +176,7 @@ public class MysqlConnection implements DataConnection {
 				
 				try {
 					Statement stmt = connection.createStatement();
-					ResultSet existing = stmt.executeQuery("SELECT * FROM cuboids WHERE cuboid_id LIKE '" + region.getId().toString() + "'");
+					ResultSet existing = stmt.executeQuery(MessageFormat.format(existingCuboids, region.getId().toString()));
 					// Check if there is an existing cuboid already
 					if(!existing.next())
 					{
@@ -154,11 +185,12 @@ public class MysqlConnection implements DataConnection {
 					// Save the flags
 					for(RegionFlag<?> flag : flags)
 					{
-						// Create the update/create flag query
-						final String insertFlag = "INSERT INTO cuboid_flags (cuboid_id,flag_name,value,enabled) VALUES ("
-								+ "'" + region.getId().toString() + "','" + flag.getName() + "','" + flag.getValue() + "',1)"
-								+ " ON DUPLICATE KEY UPDATE value='" + flag.getValue() + "'";
-						stmt.execute(insertFlag);
+						stmt.execute(MessageFormat.format(insertFlag, region.getId().toString(), flag.getName(), flag.getValue()));
+					}
+					// Save the whitelisted players
+					for(UUID uuid : region.getMembers())
+					{
+						stmt.execute(MessageFormat.format(insertWhitelist, uuid.toString(), region.getId().toString()));
 					}
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block

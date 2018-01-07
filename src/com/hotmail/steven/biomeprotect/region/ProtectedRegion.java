@@ -122,7 +122,7 @@ public class ProtectedRegion extends Region {
 			public void onInput(Player player, String message)
 			{
 				// Create our welcome flag and set the message value
-				StringFlag welcomeFlag = new StringFlag("welcome-message");
+				StringFlag welcomeFlag = hasFlag("welcome-message") ? (StringFlag)getFlag("welcome-message") : new StringFlag("welcome-message");
 				welcomeFlag.setValue(message);
 				setFlag(welcomeFlag);
 				player.sendMessage("Welcome message updated");
@@ -153,7 +153,7 @@ public class ProtectedRegion extends Region {
 			public void onInput(Player player, String message)
 			{
 				// Create our welcome flag and set the message value
-				StringFlag welcomeFlag = new StringFlag("leave-message");
+				StringFlag welcomeFlag = hasFlag("leave-message") ? (StringFlag)getFlag("leave-message") : new StringFlag("leave-message");
 				welcomeFlag.setValue(message);
 				setFlag(welcomeFlag);
 				player.sendMessage("Leave message updated");
