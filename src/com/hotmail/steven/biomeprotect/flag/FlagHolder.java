@@ -45,7 +45,7 @@ public class FlagHolder extends ArrayList<RegionFlag<?>> {
 		{
 			if(flag.getName().equalsIgnoreCase(name))
 			{
-				return flag;
+				return flag.;
 			}
 		}
 		

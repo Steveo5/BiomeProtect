@@ -1,5 +1,8 @@
 package com.hotmail.steven.util;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.bukkit.ChatColor;
 
 public class StringUtil {
@@ -34,6 +37,35 @@ public class StringUtil {
 		}
 		paginated.append("\n&6---------------------------");
 		return StringUtil.colorize(paginated.toString());
+	}
+	
+	/**
+	 * Convert a list to string, the splitting operator is the pipe
+	 * symbols ||
+	 * @param list
+	 * @return
+	 */
+	public static String listToString(List<String> list)
+	{
+		StringBuilder str = new StringBuilder();
+		for(int i=0;i<list.size();i++)
+		{
+			String string = list.get(i);
+			str.append(string);
+			// Insert the pipe symbols but not on the last element
+			if(i<list.size()) str.append("\\|");
+		}
+		return str.toString();
+	}
+	
+	/**
+	 * Convert a string to a list of strings, splitting by the pipe symbols |
+	 * @param str
+	 * @return
+	 */
+	public static List<String> stringToList(String str)
+	{
+		return Arrays.asList(str.split("\\|"));
 	}
 	
 }

@@ -169,6 +169,8 @@ public class RegionCreator {
 		UUID id = UUID.randomUUID();
 		// Create the region instance
 		ProtectedRegion region = new ProtectedRegion(name, material, id, owner, location, radius(), height());
+		if(!lore().isEmpty()) region.setLore(lore());
+		if(!title().isEmpty()) region.setTitle(title());
 		return region;
 	}
 	

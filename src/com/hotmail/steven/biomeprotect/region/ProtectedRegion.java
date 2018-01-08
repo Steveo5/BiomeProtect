@@ -52,11 +52,14 @@ public class ProtectedRegion extends Region {
 	private String name;
 	private Material material;
 	private MenuBuilder mainMenu, flagsMenu, whitelistMenu;
+	private String title = "";
+	private List<String> lore;
 
 	protected ProtectedRegion(String name, Material material, UUID id, UUID owner, Location center, int radius, int height)
 	{
 		super(center, radius, height);
 		this.name = name;
+		lore = new ArrayList<String>();
 		shownBlocks = new ArrayList<Block>();
 		playersInRegion = new HashSet<Player>();
 		members = new HashSet<UUID>();
@@ -371,6 +374,36 @@ public class ProtectedRegion extends Region {
 				}
 			}
 		});
+	}
+	
+	protected void setLore(List<String> lore)
+	{
+		this.lore = lore;
+	}
+	
+	public boolean hasLore()
+	{
+		return !lore.isEmpty();
+	}
+	
+	public List<String> getLore()
+	{
+		return lore;
+	}
+	
+	protected void setTitle(String title)
+	{
+		this.title = title;
+	}
+	
+	public boolean hasTitle()
+	{
+		return !title.isEmpty();
+	}
+	
+	public String getTitle()
+	{
+		return title;
 	}
 	
 	protected void setUUID(UUID id)
