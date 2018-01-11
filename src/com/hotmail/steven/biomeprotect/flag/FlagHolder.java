@@ -18,16 +18,17 @@ public class FlagHolder extends ArrayList<RegionFlag<?>> {
 	 */
 	public FlagHolder()
 	{
+		String[] states = {"allow", "deny", "whitelist"};
 		/**
 		 * Add all the default flags to our loaded list.
 		 * 
 		 * Here is where you could add your own custom flag types
 		 * by extending RegionFlag, StringFlag etc
 		 */
-		add(new BooleanFlag("pvp"));
-		add(new BooleanFlag("tnt"));
-		add(new BooleanFlag("break"));
-		add(new BooleanFlag("place"));
+		add(new StateFlag("pvp", states));
+		add(new StateFlag("tnt", states));
+		add(new StateFlag("break", states));
+		add(new StateFlag("place", states));
 		
 		add(new StringFlag("entry-message"));
 		add(new StringFlag("leave-message"));
@@ -45,7 +46,9 @@ public class FlagHolder extends ArrayList<RegionFlag<?>> {
 		{
 			if(flag.getName().equalsIgnoreCase(name))
 			{
-				return flag.;
+				if(flag instanceof BooleanFlag) return new BooleanFlag(name);
+				if(flag instanceof StateFlag) return new StateFlag(name);
+				if(flag instanceof StringFlag) return new StringFlag(name);
 			}
 		}
 		

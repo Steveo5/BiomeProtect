@@ -13,6 +13,12 @@ public class StateFlag extends RegionFlag<String> {
 		super(name);
 	}
 	
+	public StateFlag(String name, String...states)
+	{
+		this(name);
+		states(states);
+	}
+	
 	/**
 	 * Set the allowed states for this flag
 	 * @param states

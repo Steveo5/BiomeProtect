@@ -17,7 +17,10 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import com.hotmail.steven.biomeprotect.BiomeProtect;
 import com.hotmail.steven.biomeprotect.Logger;
+import com.hotmail.steven.biomeprotect.flag.BooleanFlag;
 import com.hotmail.steven.biomeprotect.flag.RegionFlag;
+import com.hotmail.steven.biomeprotect.flag.StateFlag;
+import com.hotmail.steven.biomeprotect.flag.StringFlag;
 import com.hotmail.steven.biomeprotect.region.ProtectedRegion;
 import com.hotmail.steven.biomeprotect.region.RegionCreator;
 import com.hotmail.steven.util.StringUtil;
@@ -217,12 +220,14 @@ public class MysqlConnection implements DataConnection {
 
 	@Override
 	public void loadRegions() {
-		Statement stmt = null;
+		Statement stmt = null, stmtFlags = null, stmtWhitelist = null;
 		try {
 			if(connection != null && !connection.isClosed())
 			{
 				Logger.Log(Level.INFO, "Loading regions shortly...");
 				stmt = connection.createStatement();
+				stmtFlags = connection.createStatement();
+				stmtWhitelist = connection.createStatement();
 				// Get all the cuboids
 				ResultSet cuboids = stmt.executeQuery(existingCuboids);
 				int counter = 0;
@@ -255,18 +260,25 @@ public class MysqlConnection implements DataConnection {
 						if(!title.isEmpty()) creator.title(title);
 						if(!lore.isEmpty()) creator.lore(StringUtil.stringToList(lore));
 						// Create the region
-						ProtectedRegion region = creator.createRegion(owner, loc, material);
-						ResultSet flags = stmt.executeQuery(MessageFormat.format(existingFlags, cuboidId.toString()));
-						ResultSet whitelist = stmt.executeQuery(MessageFormat.format(existingWhitelist, cuboidId.toString()));
+						ProtectedRegion region = creator.createRegion(cuboidId, owner, loc, material);
+						ResultSet flags = stmtFlags.executeQuery(MessageFormat.format(existingFlags, cuboidId.toString()));
+						ResultSet whitelist = stmtWhitelist.executeQuery(MessageFormat.format(existingWhitelist, cuboidId.toString()));
+						
+						System.out.println("whitelist query " + MessageFormat.format(existingWhitelist, cuboidId.toString()));
 						while(flags.next())
 						{
 							String flagName = flags.getString(2);
 							String value = flags.getString(3);
-							RegionFlag<?> flag = plugin.getFlagHolder().get(flagName)
+							RegionFlag<?> flag = plugin.getFlagHolder().get(flagName);
+							if(flag instanceof BooleanFlag) ((BooleanFlag)flag).setValue(Boolean.valueOf(value));
+							if(flag instanceof StringFlag) ((StringFlag)flag).setValue(value);
+							if(flag instanceof StateFlag) ((StateFlag)flag).setValue(value);
 						}
 						while(whitelist.next())
 						{
 							String uuid = whitelist.getString(1);
+							System.out.println("Recieved " + uuid);
+							region.addMember(UUID.fromString(uuid));
 						}
 						// Add the region to the loaded list
 						plugin.getRegionContainer().addRegion(region);
@@ -274,20 +286,20 @@ public class MysqlConnection implements DataConnection {
 					}
 					counter++;
 				}
+				Logger.Log(Level.INFO, "Total " + loaded + " / " + counter + " regions loaded");
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally
 		{
-			if(stmt != null)
-			{
-				try {
-					stmt.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			try {
+				if(stmt != null) stmt.close();
+				if(stmtFlags != null) stmtFlags.close();
+				if(stmtWhitelist != null) stmtWhitelist.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}

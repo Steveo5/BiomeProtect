@@ -331,14 +331,13 @@ public class ProtectedRegion extends Region {
 			public void onEnable(Button button, Player player)
 			{
 				// Get the whitelist iterator
-				Iterator<UUID> whitelistItr = getMembers().iterator();
-				int i=0;
+				List<UUID> members = new ArrayList<UUID>(getMembers());
 				// Update the menu, removing any old skulls
 				whitelistMenu.update();
-				while(whitelistItr.hasNext())
+				for(int i=0;i<members.size();i++)
 				{
 					// Get our current player
-					OfflinePlayer next = Bukkit.getOfflinePlayer(whitelistItr.next());
+					OfflinePlayer next = Bukkit.getOfflinePlayer(members.get(i));
 					// Create a button for the player so they can click and remove them from the whitelist
 					whitelistMenu.button(i, new Button(i, ItemUtil.item(Material.APPLE, 1, "&a" + next.getName(), "&eClick to remove")), new ButtonListener(next.getUniqueId())
 					{

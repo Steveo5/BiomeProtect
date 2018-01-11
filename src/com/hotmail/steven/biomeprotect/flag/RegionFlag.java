@@ -1,6 +1,6 @@
 package com.hotmail.steven.biomeprotect.flag;
 
-public abstract class RegionFlag<T> {
+public abstract class RegionFlag<T> implements Cloneable {
 
 	private String name;
 	protected T value;
