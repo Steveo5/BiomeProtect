@@ -28,13 +28,13 @@ public class RegionData {
 	
 	public RegionData(BiomeProtect plugin)
 	{
-		if(RegionConfig.getStorageType().equals("mysql"))
+		if(plugin.getRegionConfig().getStorageType().equals("mysql"))
 		{
-			String host = RegionConfig.getMysqlUrl();
-			String username = RegionConfig.getMysqlUser();
-			String database = RegionConfig.getMysqlDb();
-			String password = RegionConfig.getMysqlPass();
-			int port = RegionConfig.getMysqlPort();
+			String host = plugin.getRegionConfig().getMysqlUrl();
+			String username = plugin.getRegionConfig().getMysqlUser();
+			String database = plugin.getRegionConfig().getMysqlDb();
+			String password = plugin.getRegionConfig().getMysqlPass();
+			int port = plugin.getRegionConfig().getMysqlPort();
 			
 			connection = new MysqlConnection(plugin, username, password, host, database, port);
 		}

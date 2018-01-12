@@ -6,6 +6,7 @@ import java.util.logging.Level;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -16,55 +17,59 @@ import com.hotmail.steven.util.StringUtil;
 public class RegionConfig {
 	
 	private BiomeProtect plugin;
+	private String mysqlHeader = "database.settings.mysql";
+	private FileConfiguration cfg;
 	
 	public RegionConfig(BiomeProtect plugin)
 	{
 		this.plugin = plugin;
+		cfg = plugin.getConfig();
+		
 	}
 	
 	/**
 	 * Get the database type, either flatfile, mysql
 	 * @return
 	 */
-	public static String getStorageType()
+	public String getStorageType()
 	{
-		return "mysql";
+		return cfg.getString("database.type");
 	}
 
 	/**
 	 * If using mysql, get the url of the server
 	 */
-	public static String getMysqlUrl()
+	public String getMysqlUrl()
 	{
-		return "localhost";
+		return cfg.getString(mysqlHeader + ".address");
 	}
 	
 	/**
 	 * If using mysql, the username
 	 * @return
 	 */
-	public static String getMysqlUser()
+	public String getMysqlUser()
 	{
-		return "root";
+		return cfg.getString(mysqlHeader + ".user");
 	}
 	
 	/**
 	 * If using mysql, thhe password
 	 * @return
 	 */
-	public static String getMysqlPass()
+	public String getMysqlPass()
 	{
-		return "";
+		return cfg.getString(mysqlHeader + ".password");
 	}
 	
-	public static int getMysqlPort()
+	public int getMysqlPort()
 	{
-		return 3306;
+		return cfg.getInt(mysqlHeader + ".port");
 	}
 	
-	public static String getMysqlDb()
+	public String getMysqlDb()
 	{
-		return "regions";
+		return cfg.getString(mysqlHeader + ".database");
 	}
 	
 	// Load the protection stones from the database

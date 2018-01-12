@@ -16,6 +16,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.util.BlockVector;
 
@@ -31,6 +32,7 @@ import com.hotmail.steven.biomeprotect.menubuilder.InputListener;
 import com.hotmail.steven.biomeprotect.menubuilder.MenuBuilder;
 import com.hotmail.steven.util.ItemUtil;
 import com.hotmail.steven.util.LocationUtil;
+import com.hotmail.steven.util.StringUtil;
 import com.mojang.authlib.GameProfile;
 
 import net.minecraft.server.v1_12_R1.TileEntitySkull;
@@ -377,7 +379,10 @@ public class ProtectedRegion extends Region {
 	
 	protected void setLore(List<String> lore)
 	{
-		this.lore = lore;
+		for(String str : lore)
+		{
+			this.lore.add(StringUtil.colorize(str));
+		}
 	}
 	
 	public boolean hasLore()
@@ -493,6 +498,25 @@ public class ProtectedRegion extends Region {
 			// Remove the flag from this region if it exists
 			if(next.getName().equalsIgnoreCase(name)) itrFlag.remove();
 		}
+	}
+	
+	/**
+	 * Gets the protection stone item this protected region
+	 * represents, 'the block' that was placed
+	 * @return
+	 */
+	public ItemStack getItem()
+	{
+		ItemStack item = new ItemStack(getMaterial());
+		// Set the item lore and title
+		if(hasTitle() || hasLore())
+		{
+			ItemMeta im = item.getItemMeta();
+			if(hasTitle()) im.setDisplayName(StringUtil.colorize(getTitle()));
+			if(hasLore()) im.setLore(getLore());
+			item.setItemMeta(im);
+		}
+		return item;
 	}
 	
 	/**

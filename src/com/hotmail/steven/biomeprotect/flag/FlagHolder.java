@@ -30,7 +30,7 @@ public class FlagHolder extends ArrayList<RegionFlag<?>> {
 		add(new StateFlag("break", states));
 		add(new StateFlag("place", states));
 		
-		add(new StringFlag("entry-message"));
+		add(new StringFlag("welcome-message"));
 		add(new StringFlag("leave-message"));
 	}
 	
@@ -42,10 +42,13 @@ public class FlagHolder extends ArrayList<RegionFlag<?>> {
 	 */
 	public RegionFlag<?> get(String name)
 	{
+		System.out.println("Getting flag " + name);
 		for(RegionFlag<?> flag : this)
 		{
+			System.out.println("Flag " + flag.getName());
 			if(flag.getName().equalsIgnoreCase(name))
 			{
+				System.out.println("Returning flag " + name);
 				if(flag instanceof BooleanFlag) return new BooleanFlag(name);
 				if(flag instanceof StateFlag) return new StateFlag(name);
 				if(flag instanceof StringFlag) return new StringFlag(name);

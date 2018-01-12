@@ -198,11 +198,15 @@ public class MysqlConnection implements DataConnection {
 					{
 						stmt.execute(insertRegionQuery);
 					}
+					// Clear flags
+					stmt.execute(MessageFormat.format(removeFlags, region.getId().toString()));
 					// Save the flags
 					for(RegionFlag<?> flag : flags)
 					{
 						stmt.execute(MessageFormat.format(insertFlag, region.getId().toString(), flag.getName(), flag.getValue()));
 					}
+					// Clear whitelist
+					stmt.execute(MessageFormat.format(removeMembers, region.getId().toString()));
 					// Save the whitelisted players
 					for(UUID uuid : region.getMembers())
 					{
@@ -270,9 +274,13 @@ public class MysqlConnection implements DataConnection {
 							String flagName = flags.getString(2);
 							String value = flags.getString(3);
 							RegionFlag<?> flag = plugin.getFlagHolder().get(flagName);
+							System.out.println("Gettinf flag " + flag.getName());
+							
 							if(flag instanceof BooleanFlag) ((BooleanFlag)flag).setValue(Boolean.valueOf(value));
 							if(flag instanceof StringFlag) ((StringFlag)flag).setValue(value);
 							if(flag instanceof StateFlag) ((StateFlag)flag).setValue(value);
+							System.out.println("Setting flag " + flag.getName() + " " + flag.getValue());
+							region.setFlag(flag);
 						}
 						while(whitelist.next())
 						{

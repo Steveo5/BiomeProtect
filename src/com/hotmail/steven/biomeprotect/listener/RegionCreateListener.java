@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -80,7 +81,12 @@ public class RegionCreateListener extends BiomeProtectListener {
 		{
 			// Delete the region
 			getPlugin().getRegionContainer().removeRegion(region);
+			// Don't drop the default item as we need to control the item meta
+			evt.setDropItems(false);
 			tl(evt.getPlayer(), "regionRemoved");
+			// Drop our specific stone
+			World w = evt.getPlayer().getWorld();
+			w.dropItem(evt.getBlock().getLocation(), region.getItem());
 			// Remove from the database
 			getPlugin().getRegionData().getConnection().removeRegion(region.getId());
 		}
