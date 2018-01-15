@@ -121,7 +121,7 @@ public class RegionFlagsListener extends BiomeProtectListener {
 					// Get the stateflag that can have whitelist, allow, deny
 					StateFlag pvpFlag = (StateFlag)highest.getFlag("pvp");
 					// Examine the states
-					if(pvpFlag.getValue().equalsIgnoreCase("deny") || (pvpFlag.getValue().equalsIgnoreCase("whitelist") && !highest.hasMember(d)))
+					if(!highest.hasPermission(p, pvpFlag))
 					{
 						tl(d, "noPvp");
 						evt.setCancelled(true);
@@ -146,7 +146,7 @@ public class RegionFlagsListener extends BiomeProtectListener {
 			{
 				StateFlag tntFlag = (StateFlag)highest.getFlag("tnt");
 				// Tnt flag is set to deny or player is not on the whitelist and the flag is whitelist
-				if(tntFlag.getValue().equals("deny") || (tntFlag.getValue().equals("whitelist") && !highest.hasMember(p)))
+				if(highest.hasPermission(p, tntFlag))
 				{
 					evt.setCancelled(true);
 					tl(p, "noBuildPermission");
@@ -169,7 +169,7 @@ public class RegionFlagsListener extends BiomeProtectListener {
 			{
 				StateFlag buildFlag = (StateFlag)highest.getFlag("build");
 				// Build flag is set to deny or player is not on the whitelist and the flag is whitelist
-				if(!p.hasPermission("biomeprotect.bypass.place") && (buildFlag.getValue().equals("deny") || (buildFlag.getValue().equals("whitelist") && (!highest.hasMember(p) || !highest.isOwner(p)))))
+				if(!highest.hasPermission(p, buildFlag))
 				{
 					evt.setCancelled(true);
 					tl(p, "noBuildPermission");
@@ -192,8 +192,9 @@ public class RegionFlagsListener extends BiomeProtectListener {
 			{
 				StateFlag buildFlag = (StateFlag)highest.getFlag("break");
 				// Build flag is set to deny or player is not on the whitelist and the flag is whitelist
-				if(!p.hasPermission("biomeprotect.bypass.place") && (buildFlag.getValue().equals("deny") || (buildFlag.getValue().equals("whitelist") && (!highest.hasMember(p) || !highest.isOwner(p)))))
+				if(!highest.hasPermission(p, buildFlag))
 				{
+					
 					evt.setCancelled(true);
 					tl(p, "noBuildPermission");
 				}
@@ -227,7 +228,7 @@ public class RegionFlagsListener extends BiomeProtectListener {
         			{
         				StateFlag doorsFlag = (StateFlag)highest.getFlag("doors");
         				// Build flag is set to deny or player is not on the whitelist and the flag is whitelist
-        				if((doorsFlag.getValue().equals("deny") || (doorsFlag.getValue().equals("whitelist") && (!highest.hasMember(evt.getPlayer()) || !highest.isOwner(evt.getPlayer())))))
+        				if(!highest.hasPermission(evt.getPlayer(), doorsFlag))
         				{
         					evt.setCancelled(true);
         					tl(evt.getPlayer(), "noInteractPermission");
@@ -261,7 +262,7 @@ public class RegionFlagsListener extends BiomeProtectListener {
         			{
         				StateFlag doorsFlag = (StateFlag)highest.getFlag("chests");
         				// Build flag is set to deny or player is not on the whitelist and the flag is whitelist
-        				if((doorsFlag.getValue().equals("deny") || (doorsFlag.getValue().equals("whitelist") && (!highest.hasMember(evt.getPlayer()) || !highest.isOwner(evt.getPlayer())))))
+        				if(!highest.hasPermission(evt.getPlayer(), doorsFlag))
         				{
         					evt.setCancelled(true);
         					tl(evt.getPlayer(), "noInteractPermission");
@@ -296,7 +297,7 @@ public class RegionFlagsListener extends BiomeProtectListener {
         			{
         				StateFlag doorsFlag = (StateFlag)highest.getFlag("other");
         				// Build flag is set to deny or player is not on the whitelist and the flag is whitelist
-        				if((doorsFlag.getValue().equals("deny") || (doorsFlag.getValue().equals("whitelist") && (!highest.hasMember(evt.getPlayer()) || !highest.isOwner(evt.getPlayer())))))
+        				if(!highest.hasPermission(evt.getPlayer(), doorsFlag))
         				{
         					evt.setCancelled(true);
         					tl(evt.getPlayer(), "noInteractPermission");

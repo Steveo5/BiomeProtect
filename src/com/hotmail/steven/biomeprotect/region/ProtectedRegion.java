@@ -1,5 +1,7 @@
 package com.hotmail.steven.biomeprotect.region;
 
+import static com.hotmail.steven.biomeprotect.Language.tl;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -792,6 +794,32 @@ public class ProtectedRegion extends Region {
 	public void removeMember(UUID member)
 	{
 		members.remove(member);
+	}
+	
+	/**
+	 * Check if a player has permission based on the StateFlag
+	 * @param p
+	 * @param flag
+	 * @return
+	 */
+	public boolean hasPermission(Player p, StateFlag flag)
+	{
+		// Build flag is set to deny or player is not on the whitelist and the flag is whitelist
+		if(flag.getValue().equals("deny") || flag.getValue().equals("whitelist"))
+		{
+			// Check if the player is white listed
+			if(flag.getValue().equals("whitelist") && (hasMember(p) || isOwner(p)))
+			{
+				return true;
+			}
+			if(p.hasPermission("biomeprotect.bypass.break"))
+			{
+				return true;
+			}
+			
+			return false;
+		}
+		return true;
 	}
 	
 	@Override
