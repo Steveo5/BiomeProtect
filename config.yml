@@ -4,10 +4,6 @@
 # ------------------------------------------------ #
 ####################################################
 
-# Configure how many times players can interact per second
-# this is used for opening block configuration
-interact-limit: 1
-
 # Logging - this section defines whether or not to log to the log.txt file
 logging:
   enabled: true
@@ -34,7 +30,7 @@ protection-stones:
     prevent-break: true
     welcome-message: 'Entered %player%s protection'
     leave-message: 'Left %players%s protection'
-    
+ 
 ####################################################
 # ------------------------------------------------ #
 #              Database configuration              #

@@ -40,7 +40,7 @@ public class RegionProtectionListener extends BiomeProtectListener {
 			ProtectedRegion region = getPlugin().getRegionContainer().queryRegion(evt.getClickedBlock().getLocation());
 			if(region != null)
 			{
-				if(region.isOwner(evt.getPlayer()))
+				if(region.isOwner(evt.getPlayer()) || evt.getPlayer().hasPermission("biomeprotect.bypass.edit"))
 				{
 					editingRegions.put(evt.getPlayer().getUniqueId(), region);
 					region.showMenu(evt.getPlayer());
@@ -62,7 +62,7 @@ public class RegionProtectionListener extends BiomeProtectListener {
 			Player p = evt.getPlayer();
 			// Get the highest priority region as higher priorities override lower ones
 			ProtectedRegion region = regions.getHighestPriority();
-			if(!region.isOwner(p) && !region.hasMember(p))
+			if(!region.isOwner(p) && !region.hasMember(p) && !p.hasPermission("biomeprotect.bypass.break"))
 			{
 				evt.setCancelled(true);
 				tl(p, "noBuildPermission");
@@ -80,7 +80,7 @@ public class RegionProtectionListener extends BiomeProtectListener {
 			Player p = evt.getPlayer();
 			// Get the highest priority region as higher priorities override lower ones
 			ProtectedRegion region = regions.getHighestPriority();
-			if(!region.isOwner(p) && !region.hasMember(p))
+			if(!region.isOwner(p) && !region.hasMember(p) && !p.hasPermission("biomeprotect.bypass.place"))
 			{
 				evt.setCancelled(true);
 				tl(p, "noBuildPermission");

@@ -5,13 +5,17 @@ import java.util.UUID;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.material.Door;
 
 import com.hotmail.steven.biomeprotect.BiomeProtect;
 import com.hotmail.steven.biomeprotect.ProtectedRegionList;
@@ -165,7 +169,7 @@ public class RegionFlagsListener extends BiomeProtectListener {
 			{
 				StateFlag buildFlag = (StateFlag)highest.getFlag("build");
 				// Build flag is set to deny or player is not on the whitelist and the flag is whitelist
-				if(buildFlag.getValue().equals("deny") || (buildFlag.getValue().equals("whitelist") && !highest.hasMember(p)))
+				if(!p.hasPermission("biomeprotect.bypass.place") && (buildFlag.getValue().equals("deny") || (buildFlag.getValue().equals("whitelist") && (!highest.hasMember(p) || !highest.isOwner(p)))))
 				{
 					evt.setCancelled(true);
 					tl(p, "noBuildPermission");
@@ -188,7 +192,7 @@ public class RegionFlagsListener extends BiomeProtectListener {
 			{
 				StateFlag buildFlag = (StateFlag)highest.getFlag("break");
 				// Build flag is set to deny or player is not on the whitelist and the flag is whitelist
-				if(buildFlag.getValue().equals("deny") || (buildFlag.getValue().equals("whitelist") && !highest.hasMember(p)))
+				if(!p.hasPermission("biomeprotect.bypass.place") && (buildFlag.getValue().equals("deny") || (buildFlag.getValue().equals("whitelist") && (!highest.hasMember(p) || !highest.isOwner(p)))))
 				{
 					evt.setCancelled(true);
 					tl(p, "noBuildPermission");
@@ -197,4 +201,109 @@ public class RegionFlagsListener extends BiomeProtectListener {
 		}
 	}
 
+	@EventHandler
+	public void onDoorOpen(PlayerInteractEvent evt)
+	{
+        Action action = evt.getAction();
+        Block clicked = evt.getClickedBlock();
+             
+        //Left or Right click?
+        if ((action == Action.RIGHT_CLICK_BLOCK) || (action == Action.LEFT_CLICK_BLOCK))
+        {
+            //Door Block?
+            if((clicked.getType() == Material.ACACIA_DOOR) || (clicked.getType() == Material.IRON_TRAPDOOR) || (clicked.getType() == Material.TRAP_DOOR)
+            		|| (clicked.getType() == Material.BIRCH_DOOR) || (clicked.getType() == Material.DARK_OAK_DOOR) || (clicked.getType() == Material.IRON_DOOR)
+            		|| (clicked.getType() == Material.IRON_DOOR) || (clicked.getType() == Material.JUNGLE_DOOR) || (clicked.getType() == Material.SPRUCE_DOOR)
+            		|| (clicked.getType() == Material.WOOD_DOOR))
+            {
+                
+        		// Get all regions at the block
+        		ProtectedRegionList atBlock = getPlugin().getRegionContainer().queryRegions(clicked.getLocation());
+        		if(!atBlock.isEmpty())
+        		{
+        			// Get the highest priority region
+        			ProtectedRegion highest = atBlock.getHighestPriority();
+        			if(highest.hasFlag("doors"))
+        			{
+        				StateFlag doorsFlag = (StateFlag)highest.getFlag("doors");
+        				// Build flag is set to deny or player is not on the whitelist and the flag is whitelist
+        				if((doorsFlag.getValue().equals("deny") || (doorsFlag.getValue().equals("whitelist") && (!highest.hasMember(evt.getPlayer()) || !highest.isOwner(evt.getPlayer())))))
+        				{
+        					evt.setCancelled(true);
+        					tl(evt.getPlayer(), "noInteractPermission");
+        				}
+        			}
+        		}
+            }
+        }
+	}
+	
+	@EventHandler
+	public void onChestOpen(PlayerInteractEvent evt)
+	{
+        Action action = evt.getAction();
+        Block clicked = evt.getClickedBlock();
+             
+        //Left or Right click?
+        if ((action == Action.RIGHT_CLICK_BLOCK) || (action == Action.LEFT_CLICK_BLOCK))
+        {
+            //Door Block?
+            if(clicked.getType() == Material.CHEST || clicked.getType() == Material.TRAPPED_CHEST)
+            {
+                
+        		// Get all regions at the block
+        		ProtectedRegionList atBlock = getPlugin().getRegionContainer().queryRegions(clicked.getLocation());
+        		if(!atBlock.isEmpty())
+        		{
+        			// Get the highest priority region
+        			ProtectedRegion highest = atBlock.getHighestPriority();
+        			if(highest.hasFlag("chests"))
+        			{
+        				StateFlag doorsFlag = (StateFlag)highest.getFlag("chests");
+        				// Build flag is set to deny or player is not on the whitelist and the flag is whitelist
+        				if((doorsFlag.getValue().equals("deny") || (doorsFlag.getValue().equals("whitelist") && (!highest.hasMember(evt.getPlayer()) || !highest.isOwner(evt.getPlayer())))))
+        				{
+        					evt.setCancelled(true);
+        					tl(evt.getPlayer(), "noInteractPermission");
+        				}
+        			}
+        		}
+            }
+        }
+	}
+	
+	@EventHandler
+	public void onOtherInteract(PlayerInteractEvent evt)
+	{
+        Action action = evt.getAction();
+        Block clicked = evt.getClickedBlock();
+             
+        //Left or Right click?
+        if ((action == Action.RIGHT_CLICK_BLOCK) || (action == Action.LEFT_CLICK_BLOCK))
+        {
+            //Door Block?
+            if((clicked.getType() == Material.FURNACE) || (clicked.getType() == Material.BURNING_FURNACE) || clicked.getType() ==   Material.HOPPER
+            		|| clicked.getType() == Material.HOPPER_MINECART || clicked.getType() == Material.BEACON || clicked.getType() == Material.HOPPER_MINECART)
+            {
+                
+        		// Get all regions at the block
+        		ProtectedRegionList atBlock = getPlugin().getRegionContainer().queryRegions(clicked.getLocation());
+        		if(!atBlock.isEmpty())
+        		{
+        			// Get the highest priority region
+        			ProtectedRegion highest = atBlock.getHighestPriority();
+        			if(highest.hasFlag("other"))
+        			{
+        				StateFlag doorsFlag = (StateFlag)highest.getFlag("other");
+        				// Build flag is set to deny or player is not on the whitelist and the flag is whitelist
+        				if((doorsFlag.getValue().equals("deny") || (doorsFlag.getValue().equals("whitelist") && (!highest.hasMember(evt.getPlayer()) || !highest.isOwner(evt.getPlayer())))))
+        				{
+        					evt.setCancelled(true);
+        					tl(evt.getPlayer(), "noInteractPermission");
+        				}
+        			}
+        		}
+            }
+        }
+	}
 }

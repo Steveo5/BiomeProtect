@@ -1,4 +1,4 @@
-package com.hotmail.steven.biomeprotect;
+package com.hotmail.steven.biomeprotect.visualize;
 
 import java.util.List;
 
@@ -20,7 +20,8 @@ public class BlockCleanupTask extends BukkitRunnable {
 		
 		for(Block b : toRemove)
 		{
-			b.setType(Material.AIR);
+			if(b.getType() == Material.GLASS)
+				b.setType(Material.AIR);
 		}
 		
 		toRemove.clear();

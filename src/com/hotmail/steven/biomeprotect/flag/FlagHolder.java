@@ -12,13 +12,13 @@ public class FlagHolder extends ArrayList<RegionFlag<?>> {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-
+	String[] states = {"allow", "deny", "whitelist"};
+	
 	/**
 	 * Hold all of the available flags able to be used
 	 */
 	public FlagHolder()
 	{
-		String[] states = {"allow", "deny", "whitelist"};
 		/**
 		 * Add all the default flags to our loaded list.
 		 * 
@@ -29,6 +29,9 @@ public class FlagHolder extends ArrayList<RegionFlag<?>> {
 		add(new StateFlag("tnt", states));
 		add(new StateFlag("break", states));
 		add(new StateFlag("place", states));
+		add(new StateFlag("doors", states));
+		add(new StateFlag("chests", states));
+		add(new StateFlag("other", states));
 		
 		add(new StringFlag("welcome-message"));
 		add(new StringFlag("leave-message"));
@@ -50,7 +53,7 @@ public class FlagHolder extends ArrayList<RegionFlag<?>> {
 			{
 				System.out.println("Returning flag " + name);
 				if(flag instanceof BooleanFlag) return new BooleanFlag(name);
-				if(flag instanceof StateFlag) return new StateFlag(name);
+				if(flag instanceof StateFlag) return new StateFlag(name, states);
 				if(flag instanceof StringFlag) return new StringFlag(name);
 			}
 		}

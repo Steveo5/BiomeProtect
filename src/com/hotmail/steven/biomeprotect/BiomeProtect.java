@@ -13,7 +13,9 @@ import com.hotmail.steven.biomeprotect.listener.RegionCacheListener;
 import com.hotmail.steven.biomeprotect.listener.RegionCreateListener;
 import com.hotmail.steven.biomeprotect.listener.RegionFlagsListener;
 import com.hotmail.steven.biomeprotect.listener.RegionProtectionListener;
+import com.hotmail.steven.biomeprotect.listener.RegionVisualizationListener;
 import com.hotmail.steven.biomeprotect.manager.RegionContainer;
+import com.hotmail.steven.biomeprotect.manager.RegionVisualizer;
 import com.hotmail.steven.biomeprotect.menubuilder.MenuBuilderListener;
 import com.hotmail.steven.biomeprotect.region.RegionSaveTask;
 import com.hotmail.steven.biomeprotect.storage.RegionConfig;
@@ -29,6 +31,7 @@ public class BiomeProtect extends JavaPlugin {
 	private RegionContainer regionContainer;
 	private List<BiomeProtectListener> listeners;
 	private RegionSaveTask regionSaveTask;
+	private static RegionVisualizer visualizer;
 	
 	@Override
 	public void onEnable()
@@ -57,11 +60,13 @@ public class BiomeProtect extends JavaPlugin {
 		RegionCreateListener createListener = new RegionCreateListener(this);
 		RegionFlagsListener flagListener = new RegionFlagsListener(this);
 		RegionProtectionListener protectionListener = new RegionProtectionListener(this);
+		RegionVisualizationListener regionVisualizationListener = new RegionVisualizationListener(this);
 		// Add them to the loaded list
 		listeners.add(cacheListener);
 		listeners.add(createListener);
 		listeners.add(flagListener);
 		listeners.add(protectionListener);
+		listeners.add(regionVisualizationListener);
 		
 		for(BiomeProtectListener listener : listeners)
 		{
@@ -74,6 +79,8 @@ public class BiomeProtect extends JavaPlugin {
 		regionData = new RegionData(this);
 		regionSaveTask = new RegionSaveTask(this);
 		Bukkit.getScheduler().runTaskTimer(this, regionSaveTask, 20L * 10L, 20L * getConfig().getInt("database.interval.seconds"));
+		
+		visualizer = new RegionVisualizer(this);
 	}
 	
 	@Override
@@ -134,6 +141,11 @@ public class BiomeProtect extends JavaPlugin {
 	{
 		return flagHolder;
 		
+	}
+	
+	public static RegionVisualizer getVisualizer()
+	{
+		return visualizer;
 	}
 	
 }

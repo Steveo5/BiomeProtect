@@ -21,7 +21,6 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.util.BlockVector;
 
 import com.hotmail.steven.biomeprotect.BiomeProtect;
-import com.hotmail.steven.biomeprotect.BlockCleanupTask;
 import com.hotmail.steven.biomeprotect.Logger;
 import com.hotmail.steven.biomeprotect.flag.RegionFlag;
 import com.hotmail.steven.biomeprotect.flag.StateFlag;
@@ -30,11 +29,13 @@ import com.hotmail.steven.biomeprotect.menubuilder.Button;
 import com.hotmail.steven.biomeprotect.menubuilder.ButtonListener;
 import com.hotmail.steven.biomeprotect.menubuilder.InputListener;
 import com.hotmail.steven.biomeprotect.menubuilder.MenuBuilder;
+import com.hotmail.steven.biomeprotect.visualize.BlockCleanupTask;
 import com.hotmail.steven.util.ItemUtil;
 import com.hotmail.steven.util.LocationUtil;
 import com.hotmail.steven.util.StringUtil;
 import com.mojang.authlib.GameProfile;
 
+import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_12_R1.TileEntitySkull;
 
 public class ProtectedRegion extends Region {
@@ -180,7 +181,7 @@ public class ProtectedRegion extends Region {
 				{
 					StateFlag pvpFlag = (StateFlag)getFlag("pvp");
 					String state = pvpFlag.getValue();
-					button.lore(state);
+					button.lore(ChatColor.YELLOW + state);
 					flagsMenu.update();
 				}
 			}
@@ -194,8 +195,7 @@ public class ProtectedRegion extends Region {
 					pvpFlag = (StateFlag)getFlag("pvp");
 				} else
 				{
-					pvpFlag = new StateFlag("pvp");
-					pvpFlag.states("allow", "deny", "whitelist");
+					pvpFlag = new StateFlag("pvp", "allow", "deny", "whitelist");
 					setFlag(pvpFlag);
 				}
 				String state = pvpFlag.next();
@@ -214,7 +214,7 @@ public class ProtectedRegion extends Region {
 				{
 					StateFlag pvpFlag = (StateFlag)getFlag("tnt");
 					String state = pvpFlag.getValue();
-					button.lore(state);
+					button.lore(ChatColor.YELLOW + state);
 					mainMenu.update();
 				}
 			}
@@ -228,8 +228,7 @@ public class ProtectedRegion extends Region {
 					pvpFlag = (StateFlag)getFlag("tnt");
 				} else
 				{
-					pvpFlag = new StateFlag("tnt");
-					pvpFlag.states("allow", "deny", "whitelist");
+					pvpFlag = new StateFlag("tnt", "allow", "deny", "whitelist");
 					setFlag(pvpFlag);
 				}
 				String state = pvpFlag.next();
@@ -239,7 +238,7 @@ public class ProtectedRegion extends Region {
 			}
 		});
 		
-		flagsMenu.button(4, new Button(4, ItemUtil.item(Material.PAPER, 1, "&7Break", "&eallow")), new ButtonListener()
+		flagsMenu.button(4, new Button(4, ItemUtil.item(Material.PAPER, 1, "&7Break", "&edeny")), new ButtonListener()
 		{
 			@Override
 			public void onEnable(Button button, Player player)
@@ -248,7 +247,7 @@ public class ProtectedRegion extends Region {
 				{
 					StateFlag pvpFlag = (StateFlag)getFlag("break");
 					String state = pvpFlag.getValue();
-					button.lore(state);
+					button.lore(ChatColor.YELLOW + state);
 					flagsMenu.update();
 				}
 			}
@@ -262,8 +261,7 @@ public class ProtectedRegion extends Region {
 					pvpFlag = (StateFlag)getFlag("break");
 				} else
 				{
-					pvpFlag = new StateFlag("break");
-					pvpFlag.states("allow", "deny", "whitelist");
+					pvpFlag = new StateFlag("break", "allow", "deny", "whitelist");
 					setFlag(pvpFlag);
 				}
 				String state = pvpFlag.next();
@@ -273,7 +271,7 @@ public class ProtectedRegion extends Region {
 			}
 		});
 		
-		flagsMenu.button(5, new Button(5, ItemUtil.item(Material.PAPER, 1, "&7Place", "&eallow")), new ButtonListener()
+		flagsMenu.button(5, new Button(5, ItemUtil.item(Material.PAPER, 1, "&7Place", "&edeny")), new ButtonListener()
 		{
 			@Override
 			public void onEnable(Button button, Player player)
@@ -282,7 +280,7 @@ public class ProtectedRegion extends Region {
 				{
 					StateFlag pvpFlag = (StateFlag)getFlag("place");
 					String state = pvpFlag.getValue();
-					button.lore(state);
+					button.lore(ChatColor.YELLOW + state);
 					flagsMenu.update();
 				}
 			}
@@ -296,13 +294,111 @@ public class ProtectedRegion extends Region {
 					pvpFlag = (StateFlag)getFlag("place");
 				} else
 				{
-					pvpFlag = new StateFlag("place");
-					pvpFlag.states("allow", "deny", "whitelist");
+					pvpFlag = new StateFlag("place", "allow", "deny", "whitelist");
 					setFlag(pvpFlag);
 				}
 				String state = pvpFlag.next();
 				pvpFlag.setValue(state);
 				button.lore("&e" + pvpFlag.getValue());
+				flagsMenu.update();
+			}
+		});
+		
+		flagsMenu.button(6, new Button(6, ItemUtil.item(Material.PAPER, 1, "&7Doors", "&eallow")), new ButtonListener()
+		{
+			@Override
+			public void onEnable(Button button, Player player)
+			{
+				if(hasFlag("doors"))
+				{
+					StateFlag doorsFlag = (StateFlag)getFlag("doors");
+					String state = doorsFlag.getValue();
+					button.lore(ChatColor.YELLOW + state);
+					flagsMenu.update();
+				}
+			}
+			
+			@Override
+			public void onClick(Button button, Player player)
+			{
+				StateFlag doorsFlag = null;
+				if(hasFlag("doors"))
+				{
+					doorsFlag = (StateFlag)getFlag("doors");
+				} else
+				{
+					doorsFlag = new StateFlag("doors", "allow", "deny", "whitelist");
+					setFlag(doorsFlag);
+				}
+				String state = doorsFlag.next();
+				doorsFlag.setValue(state);
+				button.lore("&e" + doorsFlag.getValue());
+				flagsMenu.update();
+			}
+		});
+		
+		flagsMenu.button(7, new Button(7, ItemUtil.item(Material.PAPER, 1, "&7Chests", "&eallow")), new ButtonListener()
+		{
+			@Override
+			public void onEnable(Button button, Player player)
+			{
+				if(hasFlag("chests"))
+				{
+					StateFlag chestsFlag = (StateFlag)getFlag("chests");
+					String state = chestsFlag.getValue();
+					button.lore(ChatColor.YELLOW + state);
+					flagsMenu.update();
+				}
+			}
+			
+			@Override
+			public void onClick(Button button, Player player)
+			{
+				StateFlag chestsFlag = null;
+				if(hasFlag("chests"))
+				{
+					chestsFlag = (StateFlag)getFlag("chests");
+				} else
+				{
+					chestsFlag = new StateFlag("chests", "allow", "deny", "whitelist");
+					setFlag(chestsFlag);
+				}
+				String state = chestsFlag.next();
+				chestsFlag.setValue(state);
+				button.lore("&e" + chestsFlag.getValue());
+				flagsMenu.update();
+			}
+		});
+		
+		flagsMenu.button(8, new Button(8, ItemUtil.item(Material.PAPER, 1, "&7Other", "&eallow")), new ButtonListener()
+		{
+			@Override
+			public void onEnable(Button button, Player player)
+			{
+				if(hasFlag("other"))
+				{
+					StateFlag otherFlag = (StateFlag)getFlag("other");
+					String state = otherFlag.getValue();
+					button.lore(ChatColor.YELLOW + state);
+					flagsMenu.update();
+				}
+			}
+			
+			@Override
+			public void onClick(Button button, Player player)
+			{
+				StateFlag otherFlag = null;
+				if(hasFlag("other"))
+				{
+					otherFlag = (StateFlag)getFlag("other");
+				} else
+				{
+					otherFlag = new StateFlag("other", "allow", "deny", "whitelist");
+					setFlag(otherFlag);
+				}
+				String state = otherFlag.next();
+				otherFlag.setValue(state);
+				button.lore("&e" + otherFlag.getValue());
 				flagsMenu.update();
 			}
 		});
@@ -603,66 +699,7 @@ public class ProtectedRegion extends Region {
 	
 	public void show()
 	{
-		int radius = getRadius();
-		BlockVector point1 = getSmallerPoint();
-		BlockVector point2 = getLargerPoint();
-		int p1X = point1.getBlockX() < point2.getBlockX() ? point1.getBlockX() : point2.getBlockX();
-		int p1Y = point1.getBlockY() < point2.getBlockY() ? point1.getBlockY() : point2.getBlockY();
-		int p1Z = point1.getBlockZ() < point2.getBlockZ() ? point1.getBlockZ() : point2.getBlockZ();
-		
-		int p2X = point1.getBlockX() > point2.getBlockX() ? point1.getBlockX() : point2.getBlockX();
-		int p2Y = point1.getBlockY() > point2.getBlockY() ? point1.getBlockY() : point2.getBlockY();
-		int p2Z = point1.getBlockZ() > point2.getBlockZ() ? point1.getBlockZ() : point2.getBlockZ();
-		int diameter = radius * 2;
-		// Get all blocks in the square
-		for(int i=0;i<radius * 2;i++)
-		{
-			Block bottom1X = getWorld().getBlockAt(p1X + i,  p1Y, p1Z);
-			shownBlocks.add(bottom1X);
-			
-			Block top1X = getWorld().getBlockAt(p1X + i,  p1Y + diameter, p1Z);
-			shownBlocks.add(top1X);
-			
-			Block firstY = getWorld().getBlockAt(p1X, p1Y + i, p1Z);
-			shownBlocks.add(firstY);
-			
-			Block bottom1Z = getWorld().getBlockAt(p1X, p1Y, p1Z + i);
-			shownBlocks.add(bottom1Z);
-			
-			Block top1Z = getWorld().getBlockAt(p1X, p1Y + diameter, p1Z + i);
-			shownBlocks.add(top1Z);
-			
-			Block top2X = getWorld().getBlockAt(p2X - i,  p2Y, p2Z);
-			shownBlocks.add(top2X);
-			
-			Block bottom2X = getWorld().getBlockAt(p2X - i,  p2Y - diameter, p2Z);
-			shownBlocks.add(bottom2X);
-			
-			Block thirdY = getWorld().getBlockAt(p2X, p2Y - i, p2Z);
-			shownBlocks.add(thirdY);
-			
-			Block top2Z = getWorld().getBlockAt(p2X, p2Y, p2Z - i);
-			shownBlocks.add(top2Z);
-			
-			Block bottom2Z = getWorld().getBlockAt(p2X, p2Y - diameter, p2Z - i);
-			shownBlocks.add(bottom2Z);
-			
-			Block secondY = getWorld().getBlockAt(p1X + diameter, p2Y - i, p1Z);
-			shownBlocks.add(secondY);
-			
-			Block fourthY = getWorld().getBlockAt(p2X - diameter, p2Y - i, p2Z);
-			shownBlocks.add(fourthY);
-		}
-		
-		for(Block b : shownBlocks)
-		{
-			if(b.getType() == Material.AIR)
-			{
-				b.setType(Material.GLASS);
-			}
-		}
-		
-		new BlockCleanupTask(shownBlocks).runTaskLater(BiomeProtect.instance(), 20L * 40);
+		BiomeProtect.getVisualizer().show(BiomeProtect.getVisualizer().getVisualization(this));
 	}
 	
 	/**

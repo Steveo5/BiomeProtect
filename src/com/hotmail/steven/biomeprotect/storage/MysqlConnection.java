@@ -102,14 +102,22 @@ public class MysqlConnection implements DataConnection {
 		this.plugin = plugin;
 		Logger.Log(Level.INFO, "Mysql connection type selected, sending connection shortly");
         try {    
-            openConnection(); 
+        	// Test connection
+            getConnection(); 
             Logger.Log(Level.INFO, "Database connection was succesful");
-    
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
             Logger.Log(Level.INFO, "Failed connection to database... disabling, please check your config and restart the server/plugin");
             Bukkit.getPluginManager().disablePlugin(plugin);
+        } finally
+        {
+        	try {
+				connection.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
         
         
@@ -121,19 +129,123 @@ public class MysqlConnection implements DataConnection {
 	 * @throws SQLException
 	 * @throws ClassNotFoundException
 	 */
-	private void openConnection() throws SQLException, ClassNotFoundException {
-	    if (connection != null && !connection.isClosed()) {
-	        return;
-	    }
+	private Connection getConnection() throws SQLException, ClassNotFoundException {
 	 
 	    synchronized (this) {
 	        if (connection != null && !connection.isClosed()) {
-	            return;
+	            return connection;
 	        }
 	        Class.forName("com.mysql.jdbc.Driver");
 	        connection = (Connection) DriverManager.getConnection("jdbc:mysql://" + this.host+ ":" + this.port + "/" + this.db, this.user, this.pass);
 	    }
+	    return connection;
 	}
+	
+    /**
+     * Execute an update statement
+     *
+     * @param query
+     */
+    public void update(String query) {
+
+        try {
+            Statement statement = getConnection().createStatement();
+
+            try {
+                statement.executeUpdate(query);
+            } finally {
+                statement.close();
+            }
+        } catch (SQLException ex) {
+            if (!ex.toString().contains("not return ResultSet")) {
+                Logger.Log(Level.SEVERE, "Error at SQL UPDATE Query: " + ex);
+            }
+        } catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    /**
+     * Execute an insert statement
+     *
+     * @param query
+     */
+    public long insert(String query) {
+
+        try {
+            Statement statement = getConnection().createStatement();
+            ResultSet keys = null;
+
+            try {
+                statement.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
+                keys = statement.getGeneratedKeys();
+                if (keys != null) {
+                    if (keys.next()) {
+                        return keys.getLong(1);
+                    }
+                }
+            } catch (SQLException ex) {
+                if (!ex.toString().contains("not return ResultSet")) {
+                	Logger.Log(Level.SEVERE, "Error at SQL INSERT Query: " + ex);
+                }
+            } finally {
+                statement.close();
+            }            
+        } catch (SQLException ex) {
+            if (!ex.toString().contains("not return ResultSet")) {
+            	Logger.Log(Level.SEVERE, "Error at SQL INSERT Query: " + ex);
+            }
+        } catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+
+        return 0;
+    }
+    
+    /**
+     * Execute a select statement
+     *
+     * @param query
+     * @return
+     */
+    public ResultSet select(String query) {
+        try {
+            Statement statement = getConnection().createStatement();
+            return statement.executeQuery(query);
+        } catch (SQLException ex) {
+        	Logger.Log(Level.SEVERE, "Error at SQL Query: " + ex.getMessage());
+        	Logger.Log(Level.SEVERE, "Query: " + query);
+        } catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+        return null;
+    }
+    
+    /**
+     * Execute a delete statement
+     *
+     * @param query
+     */
+    public void delete(String query) {
+
+        try {
+            Statement statement = getConnection().createStatement();
+
+            try {
+                statement.executeUpdate(query);
+            } finally {
+                statement.close();
+            }
+        } catch (SQLException ex) {
+            if (!ex.toString().contains("not return ResultSet")) {
+            	Logger.Log(Level.SEVERE, "Error at SQL DELETE Query: " + ex);
+            }
+        } catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+    }
 	
 	/**
 	 * Create all the tables needed for the connection, will not create them
@@ -143,6 +255,7 @@ public class MysqlConnection implements DataConnection {
 	private void createDefaultTables()
 	{
 		try { 
+			getConnection();
 			Statement stmt = connection.createStatement();
 			ResultSet cuboidsTable = stmt.executeQuery(showCuboidsTable);
 			// Check if the cuboids table exists and if not create it
@@ -169,6 +282,16 @@ public class MysqlConnection implements DataConnection {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} finally
+		{
+			try {
+				connection.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -190,31 +313,30 @@ public class MysqlConnection implements DataConnection {
 			@Override
 			public void run() {
 				
+				ResultSet existing = select(MessageFormat.format(existingCuboidsId, region.getId().toString()));
+				// Check if there is an existing cuboid already
 				try {
-					Statement stmt = connection.createStatement();
-					ResultSet existing = stmt.executeQuery(MessageFormat.format(existingCuboidsId, region.getId().toString()));
-					// Check if there is an existing cuboid already
 					if(!existing.next())
 					{
-						stmt.execute(insertRegionQuery);
-					}
-					// Clear flags
-					stmt.execute(MessageFormat.format(removeFlags, region.getId().toString()));
-					// Save the flags
-					for(RegionFlag<?> flag : flags)
-					{
-						stmt.execute(MessageFormat.format(insertFlag, region.getId().toString(), flag.getName(), flag.getValue()));
-					}
-					// Clear whitelist
-					stmt.execute(MessageFormat.format(removeMembers, region.getId().toString()));
-					// Save the whitelisted players
-					for(UUID uuid : region.getMembers())
-					{
-						stmt.execute(MessageFormat.format(insertWhitelist, uuid.toString(), region.getId().toString()));
+						insert(insertRegionQuery);
 					}
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				}
+				// Clear flags
+				delete(MessageFormat.format(removeFlags, region.getId().toString()));
+				// Save the flags
+				for(RegionFlag<?> flag : flags)
+				{
+					insert(MessageFormat.format(insertFlag, region.getId().toString(), flag.getName(), flag.getValue()));
+				}
+				// Clear whitelist
+				delete(MessageFormat.format(removeMembers, region.getId().toString()));
+				// Save the whitelisted players
+				for(UUID uuid : region.getMembers())
+				{
+					insert(MessageFormat.format(insertWhitelist, uuid.toString(), region.getId().toString()));
 				}
 				
 			}
@@ -226,6 +348,7 @@ public class MysqlConnection implements DataConnection {
 	public void loadRegions() {
 		Statement stmt = null, stmtFlags = null, stmtWhitelist = null;
 		try {
+			getConnection();
 			if(connection != null && !connection.isClosed())
 			{
 				Logger.Log(Level.INFO, "Loading regions shortly...");
@@ -265,8 +388,8 @@ public class MysqlConnection implements DataConnection {
 						if(!lore.isEmpty()) creator.lore(StringUtil.stringToList(lore));
 						// Create the region
 						ProtectedRegion region = creator.createRegion(cuboidId, owner, loc, material);
-						ResultSet flags = stmtFlags.executeQuery(MessageFormat.format(existingFlags, cuboidId.toString()));
-						ResultSet whitelist = stmtWhitelist.executeQuery(MessageFormat.format(existingWhitelist, cuboidId.toString()));
+						ResultSet flags = select(MessageFormat.format(existingFlags, cuboidId.toString()));
+						ResultSet whitelist = select(MessageFormat.format(existingWhitelist, cuboidId.toString()));
 						
 						System.out.println("whitelist query " + MessageFormat.format(existingWhitelist, cuboidId.toString()));
 						while(flags.next())
@@ -299,12 +422,16 @@ public class MysqlConnection implements DataConnection {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} finally
 		{
 			try {
 				if(stmt != null) stmt.close();
 				if(stmtFlags != null) stmtFlags.close();
 				if(stmtWhitelist != null) stmtWhitelist.close();
+				connection.close();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -316,11 +443,16 @@ public class MysqlConnection implements DataConnection {
 	public void removeRegion(UUID id) {
 		
 		try {
+			getConnection();
 			Statement stmt = connection.createStatement();
 			stmt.execute(MessageFormat.format(removeMembers, id));
 			stmt.execute(MessageFormat.format(removeFlags, id));
 			stmt.execute(MessageFormat.format(removeRegion, id));
+			connection.close();
 		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

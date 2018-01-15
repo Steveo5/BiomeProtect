@@ -9,24 +9,11 @@ public class StateFlag extends RegionFlag<String> {
 	 * are the ones only allowed to be used
 	 * @param name
 	 */
-	public StateFlag(String name) {
+	public StateFlag(String name, String...states) {
 		super(name);
-	}
-	
-	public StateFlag(String name, String...states)
-	{
-		this(name);
-		states(states);
-	}
-	
-	/**
-	 * Set the allowed states for this flag
-	 * @param states
-	 */
-	public void states(String...states)
-	{
-		value = states[0];
+		
 		this.states = states;
+		setValue(states[0]);
 	}
 	
 	/**
