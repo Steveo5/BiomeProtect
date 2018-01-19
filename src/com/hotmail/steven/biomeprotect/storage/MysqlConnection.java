@@ -152,7 +152,7 @@ public class MysqlConnection implements DataConnection {
             Statement statement = getConnection().createStatement();
 
             try {
-                statement.executeUpdate(StringUtil.addSlashes(query));
+                statement.executeUpdate(query);
             } finally {
                 statement.close();
             }
@@ -177,7 +177,7 @@ public class MysqlConnection implements DataConnection {
             ResultSet keys = null;
 
             try {
-                statement.executeUpdate(StringUtil.addSlashes(query), Statement.RETURN_GENERATED_KEYS);
+                statement.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
                 keys = statement.getGeneratedKeys();
                 if (keys != null) {
                     if (keys.next()) {
@@ -234,7 +234,7 @@ public class MysqlConnection implements DataConnection {
             Statement statement = getConnection().createStatement();
 
             try {
-                statement.executeUpdate(StringUtil.addSlashes(query));
+                statement.executeUpdate(query);
             } finally {
                 statement.close();
             }
@@ -329,7 +329,8 @@ public class MysqlConnection implements DataConnection {
 				// Save the flags
 				for(RegionFlag<?> flag : flags)
 				{
-					insert(MessageFormat.format(insertFlag, region.getId().toString(), flag.getName(), flag.getValue()));
+					String value = String.valueOf(flag.getValue());
+					insert(MessageFormat.format(insertFlag, region.getId().toString(), flag.getName(), StringUtil.addSlashes(value)));
 				}
 				// Clear whitelist
 				delete(MessageFormat.format(removeMembers, region.getId().toString()));
