@@ -152,7 +152,7 @@ public class MysqlConnection implements DataConnection {
             Statement statement = getConnection().createStatement();
 
             try {
-                statement.executeUpdate(query);
+                statement.executeUpdate(StringUtil.addSlashes(query));
             } finally {
                 statement.close();
             }
@@ -177,7 +177,7 @@ public class MysqlConnection implements DataConnection {
             ResultSet keys = null;
 
             try {
-                statement.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
+                statement.executeUpdate(StringUtil.addSlashes(query), Statement.RETURN_GENERATED_KEYS);
                 keys = statement.getGeneratedKeys();
                 if (keys != null) {
                     if (keys.next()) {
@@ -234,7 +234,7 @@ public class MysqlConnection implements DataConnection {
             Statement statement = getConnection().createStatement();
 
             try {
-                statement.executeUpdate(query);
+                statement.executeUpdate(StringUtil.addSlashes(query));
             } finally {
                 statement.close();
             }
