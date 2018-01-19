@@ -807,6 +807,8 @@ public class ProtectedRegion extends Region {
 		// Build flag is set to deny or player is not on the whitelist and the flag is whitelist
 		if(flag.getValue().equals("deny") || flag.getValue().equals("whitelist"))
 		{
+			// Owner should be able to do everything
+			if(flag.getValue().equals("deny") && isOwner(p)) return true;
 			// Check if the player is white listed
 			if(flag.getValue().equals("whitelist") && (hasMember(p) || isOwner(p)))
 			{
