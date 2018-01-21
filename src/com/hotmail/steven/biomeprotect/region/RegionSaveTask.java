@@ -23,7 +23,7 @@ public class RegionSaveTask implements Runnable {
 	
 	@Override
 	public void run() {
-		Logger.Log(Level.INFO, "Saving regions to database");
+		Logger.Log(Level.ALL, "Saving regions to database");
 		HashSet<ProtectedRegion> regions = new HashSet<ProtectedRegion>(plugin.getRegionContainer().getRegions());
 		regions.addAll(plugin.getRegionContainer().getCache().getAll());
 		// Loop over each region in the container

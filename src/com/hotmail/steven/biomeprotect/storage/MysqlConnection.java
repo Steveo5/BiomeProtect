@@ -304,7 +304,7 @@ public class MysqlConnection implements DataConnection {
 				String.valueOf(center.getBlockX()), String.valueOf(center.getBlockY()), String.valueOf(center.getBlockZ()), region.getWorld().getUID().toString(), region.getName(), 
 				region.getMaterial().name().toLowerCase(), region.getRadius(), String.valueOf(region.getPriority()),
 				region.getTitle(), StringUtil.listToString(region.getLore()));
-		System.out.println(insertRegionQuery);
+		Logger.Log(Level.INFO, insertRegionQuery);
 		// Copy the array as to not cause access exception
 		final HashSet<RegionFlag<?>> flags = new HashSet<RegionFlag<?>>(region.getFlags());
 		Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable()
@@ -392,24 +392,24 @@ public class MysqlConnection implements DataConnection {
 						ResultSet flags = select(MessageFormat.format(existingFlags, cuboidId.toString()));
 						ResultSet whitelist = select(MessageFormat.format(existingWhitelist, cuboidId.toString()));
 						
-						System.out.println("whitelist query " + MessageFormat.format(existingWhitelist, cuboidId.toString()));
+						Logger.Log(Level.INFO, "whitelist query " + MessageFormat.format(existingWhitelist, cuboidId.toString()));
 						while(flags.next())
 						{
 							String flagName = flags.getString(2);
 							String value = flags.getString(3);
 							RegionFlag<?> flag = plugin.getFlagHolder().get(flagName);
-							System.out.println("Gettinf flag " + flag.getName());
+							Logger.Log(Level.INFO, "Gettinf flag " + flag.getName());
 							
 							if(flag instanceof BooleanFlag) ((BooleanFlag)flag).setValue(Boolean.valueOf(value));
 							if(flag instanceof StringFlag) ((StringFlag)flag).setValue(value);
 							if(flag instanceof StateFlag) ((StateFlag)flag).setValue(value);
-							System.out.println("Setting flag " + flag.getName() + " " + flag.getValue());
+							Logger.Log(Level.INFO, "Setting flag " + flag.getName() + " " + flag.getValue());
 							region.setFlag(flag);
 						}
 						while(whitelist.next())
 						{
 							String uuid = whitelist.getString(1);
-							System.out.println("Recieved " + uuid);
+							Logger.Log(Level.INFO, "Recieved " + uuid);
 							region.addMember(UUID.fromString(uuid));
 						}
 						// Add the region to the loaded list
@@ -418,7 +418,7 @@ public class MysqlConnection implements DataConnection {
 					}
 					counter++;
 				}
-				Logger.Log(Level.INFO, "Total " + loaded + " / " + counter + " regions loaded");
+				Logger.Log(Level.ALL, "Total " + loaded + " / " + counter + " regions loaded");
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block

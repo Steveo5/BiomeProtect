@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.logging.Level;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -15,6 +16,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BlockVector;
 
 import com.hotmail.steven.biomeprotect.BiomeProtect;
+import com.hotmail.steven.biomeprotect.Logger;
 import com.hotmail.steven.biomeprotect.region.ProtectedRegion;
 import com.hotmail.steven.biomeprotect.visualize.Visualization;
 
@@ -47,7 +49,7 @@ public class RegionVisualizer {
                 	// Visualization needs to be removed
                 	if(System.currentTimeMillis() > (visualization.getStartTime() + (visualization.getLength() * 1000)))
                 	{
-                		System.out.println("Removing viauzliation");
+                		Logger.Log(Level.INFO, "Removing viauzliation");
                 		removeQueue.addAll(visualization.getBlocks());
                 		itr.remove();
                 	}

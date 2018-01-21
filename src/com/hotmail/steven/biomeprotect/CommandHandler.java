@@ -21,6 +21,7 @@ import static com.hotmail.steven.biomeprotect.Language.tl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 
 public class CommandHandler implements CommandExecutor {
 
@@ -113,7 +114,7 @@ public class CommandHandler implements CommandExecutor {
 						{
 							recieve = (Player)sender;
 						}
-						System.out.println("Giving " + args[1]);
+							Logger.Log(Level.INFO, "Giving " + args[1]);
 						// Give the reciever the protection stone
 						if(recieve != null && item != null)
 						{

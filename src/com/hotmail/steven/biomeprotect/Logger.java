@@ -19,6 +19,7 @@ public class Logger {
 	private static boolean loggingEnabled = true;
 	// Format the date/time string
 	private static DateFormat dateFormat;
+	private static BiomeProtect plugin;
 	
 	/**
 	 * Initializes the logger and allows logging to file
@@ -26,6 +27,7 @@ public class Logger {
 	 */
 	public static void enable(BiomeProtect plugin)
 	{
+		Logger.plugin = plugin;
 		filePath = plugin.getDataFolder() + File.separator + "log.txt";		
 		dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Logger.Log(Level.INFO, "Enabling the logger");
@@ -43,7 +45,8 @@ public class Logger {
 	 */
 	public static void Log(Level level, String message)
 	{
-		System.out.println(header + " " + message);
+		if(level != Level.INFO || plugin.getConfig().getBoolean("debugging,enabled") == true)
+			System.out.println(header + " " + message);
 		if(loggingEnabled)
 		{
 			writeToFile(message);

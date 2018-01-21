@@ -8,6 +8,12 @@
 logging:
   enabled: true
 
+# Enable verbose output to log files and console, this should usually be
+# disabled as it consumes extra resources and isn't required unless you
+# can read the output
+Debugging:
+  enabled: false
+
 # Configure custom protection stones here
 protection-stones:
   small-protection:
