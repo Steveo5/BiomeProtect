@@ -45,23 +45,7 @@ public class CommandListener implements CommandExecutor {
 				if(sender instanceof Player)
 				{
 					Player player = (Player)sender;
-					// Players target block
-					Block targetBlock = PlayerUtil.getTarget(player, 10);
-					if(targetBlock != null)
-					{
-						ProtectedRegion foundRegion = plugin.getRegionContainer().queryRegion(targetBlock.getLocation());
-						if(foundRegion != null)
-						{
-							player.sendMessage(foundRegion.toString());
-							foundRegion.show();
-						} else
-						{
-							tl(player, "regionDoesntExist");
-						}
-					} else
-					{
-						tl(player, "regionDoesntExist");
-					}
+
 				} else
 				{
 					sender.sendMessage(tl("playerOnly"));
