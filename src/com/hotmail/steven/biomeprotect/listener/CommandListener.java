@@ -1,40 +1,43 @@
-package com.hotmail.steven.biomeprotect;
+package com.hotmail.steven.biomeprotect.listener;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
-import com.hotmail.steven.biomeprotect.region.ProtectedRegion;
-import com.hotmail.steven.util.PlayerUtil;
+import com.hotmail.steven.biomeprotect.BiomeProtect;
+import com.hotmail.steven.biomeprotect.commands.BiomeProtectCommand;
 import com.hotmail.steven.util.StringUtil;
-import com.mysql.fabric.xmlrpc.base.Array;
 
 import static com.hotmail.steven.biomeprotect.Language.tl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.logging.Level;
-
-public class CommandHandler implements CommandExecutor {
+public class CommandListener implements CommandExecutor {
 
 	private BiomeProtect plugin;
 	
-	public CommandHandler(BiomeProtect plugin)
+	public CommandListener(BiomeProtect plugin)
 	{
 		this.plugin = plugin;
 	}
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+		if(plugin.getCommandHandler().isCommand(cmd.getName()))
+		{
+			try {
+				
+				BiomeProtectCommand command = plugin.getCommandHandler().getCommand(cmd.getName());
+				if(!command.run(sender, cmd.getName(), label, args))
+				{
+					sender.sendMessage(command.getUsage());
+				}
+			} catch (Exception e) {
+				sender.sendMessage(StringUtil.colorize(e.getMessage()));
+				return true;
+			}
+		}
 		
+		sender.sendMessage(tl("unknownCommand"));
+		/*
 		if(args.length > 0)
 		{
 			if(args[0].equalsIgnoreCase("show"))
@@ -130,8 +133,8 @@ public class CommandHandler implements CommandExecutor {
 				}
 			}
 			return true;
-		}
-		return false;
+		}*/
+		return true;
 	}
 
 }

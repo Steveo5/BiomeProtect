@@ -8,3 +8,4 @@ unknownProtectionStone=&cYou have entered an invalid protection stone
 unknownPlayer=&cYou have entered an unknown player
 errorVisualization=&cThere is a visualization happening at this block
 noInteractPermission=&cYou have no permission to interact here
+unknownCommand=&cYou have specified an unknown command, type /bp help

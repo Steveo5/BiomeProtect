@@ -7,13 +7,16 @@ import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.hotmail.steven.biomeprotect.commands.CmdShow;
 import com.hotmail.steven.biomeprotect.flag.FlagHolder;
 import com.hotmail.steven.biomeprotect.listener.BiomeProtectListener;
+import com.hotmail.steven.biomeprotect.listener.CommandListener;
 import com.hotmail.steven.biomeprotect.listener.RegionCacheListener;
 import com.hotmail.steven.biomeprotect.listener.RegionCreateListener;
 import com.hotmail.steven.biomeprotect.listener.RegionFlagsListener;
 import com.hotmail.steven.biomeprotect.listener.RegionProtectionListener;
 import com.hotmail.steven.biomeprotect.listener.RegionVisualizationListener;
+import com.hotmail.steven.biomeprotect.manager.CommandHandler;
 import com.hotmail.steven.biomeprotect.manager.RegionContainer;
 import com.hotmail.steven.biomeprotect.manager.RegionVisualizer;
 import com.hotmail.steven.biomeprotect.menubuilder.MenuBuilderListener;
@@ -32,6 +35,7 @@ public class BiomeProtect extends JavaPlugin {
 	private List<BiomeProtectListener> listeners;
 	private RegionSaveTask regionSaveTask;
 	private static RegionVisualizer visualizer;
+	private CommandHandler commandHandler;
 	
 	@Override
 	public void onEnable()
@@ -47,7 +51,8 @@ public class BiomeProtect extends JavaPlugin {
 		this.saveDefaultConfig();
 		// Register player listener
 		getServer().getPluginManager().registerEvents(menu, this);
-		this.getCommand("biomeprotect").setExecutor(new CommandHandler(this));
+		commandHandler = new CommandHandler(this);
+		this.getCommand("biomeprotect").setExecutor(new CommandListener(this));
 		
 		plugin = this;
 		
@@ -81,6 +86,11 @@ public class BiomeProtect extends JavaPlugin {
 		Bukkit.getScheduler().runTaskTimer(this, regionSaveTask, 20L * 10L, 20L * getConfig().getInt("database.interval.seconds"));
 		
 		visualizer = new RegionVisualizer(this);
+		
+		/**
+		 * Register BiomeProtectCommands
+		 */
+		getCommandHandler().registerCommand(new CmdShow(this, "show", "Show the physical boundaries of a region", "Usage: /bp show"));
 	}
 	
 	@Override
@@ -117,6 +127,15 @@ public class BiomeProtect extends JavaPlugin {
 	public static RegionMenu getMenu()
 	{
 		return menu;
+	}
+	
+	/**
+	 * Gets the command handler
+	 * @return
+	 */
+	public CommandHandler getCommandHandler()
+	{
+		return commandHandler;
 	}
 	
 	/**
