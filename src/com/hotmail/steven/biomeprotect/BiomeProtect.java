@@ -7,6 +7,11 @@ import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.hotmail.steven.biomeprotect.commands.CmdFlags;
+import com.hotmail.steven.biomeprotect.commands.CmdGive;
+import com.hotmail.steven.biomeprotect.commands.CmdHelp;
+import com.hotmail.steven.biomeprotect.commands.CmdList;
+import com.hotmail.steven.biomeprotect.commands.CmdNear;
 import com.hotmail.steven.biomeprotect.commands.CmdShow;
 import com.hotmail.steven.biomeprotect.flag.FlagHolder;
 import com.hotmail.steven.biomeprotect.listener.BiomeProtectListener;
@@ -81,6 +86,9 @@ public class BiomeProtect extends JavaPlugin {
 		// Handle events for the menu builders
 		new MenuBuilderListener(this);
 	
+		/**
+		 * Initiate the region data (loads all regions into memory)
+		 */
 		regionData = new RegionData(this);
 		regionSaveTask = new RegionSaveTask(this);
 		Bukkit.getScheduler().runTaskTimer(this, regionSaveTask, 20L * 10L, 20L * getConfig().getInt("database.interval.seconds"));
@@ -91,6 +99,11 @@ public class BiomeProtect extends JavaPlugin {
 		 * Register BiomeProtectCommands
 		 */
 		getCommandHandler().registerCommand(new CmdShow(this, "show", "Show the physical boundaries of a region", "Usage: /bp show"));
+		getCommandHandler().registerCommand(new CmdFlags(this, "flags", "List all of the flags that are possible (even those not shown in the gui", "Usage: /bp flags [page]"));
+		getCommandHandler().registerCommand(new CmdList(this, "list", "List all the configured protection stones", "Usage: /bp list"));
+		getCommandHandler().registerCommand(new CmdHelp(this, "help", "Show all available commands", "Usage: /help [page]"));
+		getCommandHandler().registerCommand(new CmdGive(this, "give", "Give yourself or another player a protection stone", "Usage: /bp give <pstone> [player]"));
+		getCommandHandler().registerCommand(new CmdNear(this, "near", "Show nearby protected regions", "Usage: /bp near [radius]"));
 	}
 	
 	@Override

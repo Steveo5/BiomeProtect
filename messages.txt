@@ -9,3 +9,6 @@ unknownPlayer=&cYou have entered an unknown player
 errorVisualization=&cThere is a visualization happening at this block
 noInteractPermission=&cYou have no permission to interact here
 unknownCommand=&cYou have specified an unknown command, type /bp help
+invalidPage=&cYou have specified an invalid page number
+invalidRadius=&cYou have specified an invalid radius
+regionsFound=&aTotal &e%regions%&a regions found

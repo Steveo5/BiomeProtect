@@ -12,7 +12,7 @@ public class StringUtil {
 		return ChatColor.translateAlternateColorCodes('&', str);
 	}
 	
-	public static String paginateArray(Object[] arr, int pageSize, int currentPage)
+	public static String paginateArray(Object[] arr, boolean newLine, int pageSize, int currentPage)
 	{
 		StringBuilder paginated = new StringBuilder();
 		// Generate the maximum amount of pages based on array size
@@ -28,7 +28,7 @@ public class StringUtil {
 					paginated.append("&a" + arr[i]);
 				} else
 				{
-					paginated.append("&a" + arr[i] + ", ");
+					paginated.append("&a" + arr[i] + (newLine ? "\n" : ", "));
 				}
 			}
 		} else

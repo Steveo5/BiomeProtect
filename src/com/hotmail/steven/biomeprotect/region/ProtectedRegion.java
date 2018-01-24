@@ -827,10 +827,13 @@ public class ProtectedRegion extends Region {
 	@Override
 	public String toString()
 	{
-		String minString = "Min x " + getSmallerPoint().getBlockX() + " Min y " + getSmallerPoint().getBlockY() + " Min z " + getSmallerPoint().getBlockZ();
-		String maxString = "Max x " + getLargerPoint().getBlockX() + " Max y " + getLargerPoint().getBlockY() + " Max z " + getLargerPoint().getBlockZ();
+		StringBuilder strRegion = new StringBuilder();
+		strRegion.append(Bukkit.getPlayer(getOwner()).getName() + "'s " + getTitle());
+		strRegion.append("\nCenter: " + getCenter().getBlockX() + " " + getCenter().getBlockY() + " " + getCenter().getBlockZ());
+		strRegion.append("\nMin x " + getSmallerPoint().getBlockX() + " Min y " + getSmallerPoint().getBlockY() + " Min z " + getSmallerPoint().getBlockZ());
+		strRegion.append("\nMax x " + getLargerPoint().getBlockX() + " Max y " + getLargerPoint().getBlockY() + " Max z " + getLargerPoint().getBlockZ());
 	
-		return minString + "\n" + maxString;
+		return strRegion.toString();
 	}
 	
 	@Override

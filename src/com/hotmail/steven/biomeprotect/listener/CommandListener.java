@@ -10,6 +10,8 @@ import com.hotmail.steven.util.StringUtil;
 
 import static com.hotmail.steven.biomeprotect.Language.tl;
 
+import java.util.Arrays;
+
 public class CommandListener implements CommandExecutor {
 
 	private BiomeProtect plugin;
@@ -21,12 +23,21 @@ public class CommandListener implements CommandExecutor {
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if(plugin.getCommandHandler().isCommand(cmd.getName()))
+		// Check if there are any args
+		if(args.length < 1)
+		{
+			sender.sendMessage(tl("unknownCommand"));
+			return true;
+		}
+		if(plugin.getCommandHandler().isCommand(args[0]))
 		{
 			try {
 				
-				BiomeProtectCommand command = plugin.getCommandHandler().getCommand(cmd.getName());
-				if(!command.run(sender, cmd.getName(), label, args))
+				BiomeProtectCommand command = plugin.getCommandHandler().getCommand(args[0]);
+				// Remove the command that is being sent from the args
+				String[] argsToSend = Arrays.copyOfRange(args, 1, args.length);
+				// Run the command
+				if(!command.run(sender, cmd.getName(), label, argsToSend))
 				{
 					sender.sendMessage(command.getUsage());
 				}

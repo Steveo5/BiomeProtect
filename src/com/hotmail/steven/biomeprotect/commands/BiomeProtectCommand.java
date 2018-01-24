@@ -5,6 +5,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import com.hotmail.steven.biomeprotect.BiomeProtect;
+import com.hotmail.steven.util.StringUtil;
 
 import static com.hotmail.steven.biomeprotect.Language.tl;
 
@@ -131,6 +132,12 @@ public abstract class BiomeProtectCommand {
 	public boolean run(Player sender, String name, String[] args) throws Exception
 	{
 		return false;
+	}
+	
+	@Override
+	public String toString()
+	{
+		return StringUtil.colorize(name + " - " + description);
 	}
 	
 }

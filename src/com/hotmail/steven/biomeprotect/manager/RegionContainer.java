@@ -13,6 +13,7 @@ import com.hotmail.steven.biomeprotect.BiomeProtect;
 import com.hotmail.steven.biomeprotect.ProtectedRegionList;
 import com.hotmail.steven.biomeprotect.cache.RegionCache;
 import com.hotmail.steven.biomeprotect.region.ProtectedRegion;
+import com.hotmail.steven.util.LocationUtil;
 
 public class RegionContainer {
 
@@ -179,6 +180,11 @@ public class RegionContainer {
 		while(regionItr.hasNext())
 		{
 			ProtectedRegion next = regionItr.next();
+			if(LocationUtil.boxContains(next.getSmallerPoint(), next.getLargerPoint(), point1) &&
+					LocationUtil.boxContains(next.getSmallerPoint(), next.getLargerPoint(), point2))
+			{
+				regions.add(next);
+			}
 		}
 		
 		return new ProtectedRegionList(regions);
