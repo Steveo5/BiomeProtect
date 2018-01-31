@@ -3,7 +3,9 @@ package com.hotmail.steven.biomeprotect.listener;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
@@ -86,7 +88,9 @@ public class RegionFlagsListener extends BiomeProtectListener {
 		if(region.hasFlag("welcome-message"))
 		{
 			StringFlag welcome = (StringFlag)region.getFlag("welcome-message");
-			player.sendMessage(welcome.getValue());
+			OfflinePlayer owner = Bukkit.getOfflinePlayer(region.getOwner());
+			Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "title " + player.getName() + " title [{text:Entered " + owner.getName() + "'s region,color:gold}]");
+			Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "title " + player.getName() + " subtitle [{text:" + welcome.getValue() + ",color:blue}");
 		}
 	}
 	
@@ -100,7 +104,9 @@ public class RegionFlagsListener extends BiomeProtectListener {
 		if(region.hasFlag("leave-message"))
 		{
 			StringFlag leave = (StringFlag)region.getFlag("leave-message");
-			player.sendMessage(leave.getValue());
+			OfflinePlayer owner = Bukkit.getOfflinePlayer(region.getOwner());
+			Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "title " + player.getName() + " title [{text:Left " + owner.getName() + "'s region,color:gold}]");
+			Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "title " + player.getName() + " subtitle [{text:" + leave.getValue() + ",color:blue}");
 		}
 	}
 	
