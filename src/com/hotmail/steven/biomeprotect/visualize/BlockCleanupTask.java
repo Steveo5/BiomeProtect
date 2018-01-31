@@ -27,5 +27,14 @@ public class BlockCleanupTask extends BukkitRunnable {
 		toRemove.clear();
 		
 	}
+	
+	/**
+	 * Get all the blocks left to be removed
+	 * @return
+	 */
+	public List<Block> getBlocksInQueue()
+	{
+		return toRemove;
+	}
 
 }

@@ -10,6 +10,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.logging.Level;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -19,6 +20,7 @@ import com.hotmail.steven.biomeprotect.BiomeProtect;
 import com.hotmail.steven.biomeprotect.Logger;
 import com.hotmail.steven.biomeprotect.region.ProtectedRegion;
 import com.hotmail.steven.biomeprotect.visualize.Visualization;
+import com.hotmail.steven.util.StringUtil;
 
 public class RegionVisualizer {
 
@@ -26,14 +28,21 @@ public class RegionVisualizer {
 	 * Blocks waiting to be visualized
 	 */
 	private Queue<Visualization> visuals;
-	private Queue<Block> blockQueue;
-	private Queue<Block> removeQueue;
+	private Queue<Location> blockQueue;
+	private Queue<Location> removeQueue;
+	private BiomeProtect plugin;
 	
-	public RegionVisualizer(BiomeProtect plugin)
+	/**
+	 * Initialize the RegionVisualizer
+	 * @param plugin
+	 * @param sessionRemoveQueue blocks left in queue that still need to be removed
+	 */
+	public RegionVisualizer(BiomeProtect plugin, LinkedList<Location> sessionRemoveQueue)
 	{
 		visuals = new LinkedList<Visualization>();
-		blockQueue = new LinkedList<Block>();
-		removeQueue = new LinkedList<Block>();
+		blockQueue = new LinkedList<Location>();
+		this.removeQueue = sessionRemoveQueue;
+		this.plugin = plugin;
 		
         // Create the task anonymously and schedule to run it once, after 20 ticks
         new BukkitRunnable() {
@@ -150,27 +159,56 @@ public class RegionVisualizer {
 			if(!blockQueue.isEmpty())
 			{
 				// Place a piece of glass at the spot
-				Block top = blockQueue.poll();
-				if(top.getType() == Material.AIR)
+				Location top = blockQueue.peek();
+				if(top != null && top.getChunk().isLoaded())
 				{
-					top.setType(Material.GLASS);
-				}		
+					if(top.getBlock().getType() == Material.AIR)
+					{
+						top.getBlock().setType(Material.GLASS);
+					}
+					// Remove head
+					blockQueue.poll();
+				} else
+				{
+					continue;
+				}
 			}
+		}
+		
+		for(int i=0;i<amount;i++)
+		{		
 			// Same but for remove queue
 			if(!removeQueue.isEmpty())
 			{
-				// Place a piece of glass at the spot
-				Block top = removeQueue.poll();
-				top.setType(Material.AIR);
+				Location top = removeQueue.peek();
+				if(top != null && top.getChunk().isLoaded())
+				{
+					// Place a piece of air at the spot
+					Block topBlock = removeQueue.poll().getBlock();
+					topBlock.setType(Material.AIR);
+				} else
+				{
+					continue;
+				}
 			}
 		}
+		
+		// Save the current session in case of crash or restart
+		List<String> strQueue = new ArrayList<String>();
+		for(Location loc : removeQueue)
+		{
+			// Essentially serialize
+			String strLoc = loc.getWorld().getUID().toString() + "," + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ();
+			strQueue.add(strLoc);
+		}
+		plugin.getSessionData().saveSession("remove-queue", strQueue);
 	}
 	
 	/**
 	 * Get blocks waiting to be visualized
 	 * @return
 	 */
-	public Queue<Block> getQueue()
+	public Queue<Location> getQueue()
 	{
 		return blockQueue;
 	}
@@ -179,7 +217,7 @@ public class RegionVisualizer {
 	 * Get blocks waiting to be removed from the visualized blocks
 	 * @return
 	 */
-	public Queue<Block> getRemoveQueue()
+	public Queue<Location> getRemoveQueue()
 	{
 		return removeQueue;
 	}

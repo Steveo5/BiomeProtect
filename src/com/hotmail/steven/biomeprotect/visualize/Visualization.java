@@ -3,11 +3,12 @@ package com.hotmail.steven.biomeprotect.visualize;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 
 public class Visualization {
 
-	private Set<Block> blocks;
+	private Set<Location> blocks;
 	private long started;
 	private int length;
 	private boolean shown;
@@ -20,7 +21,11 @@ public class Visualization {
 	 */
 	public Visualization(Set<Block> blocks, long started, int length)
 	{
-		this.blocks = blocks;
+		this.blocks = new HashSet<Location>();
+		for(Block b : blocks)
+		{
+			this.blocks.add(b.getLocation());
+		}
 		this.started = started;
 		this.length = length;
 	}
@@ -35,7 +40,7 @@ public class Visualization {
 		this.shown = shown;
 	}
 	
-	public Set<Block> getBlocks()
+	public Set<Location> getBlocks()
 	{
 		return blocks;
 	}

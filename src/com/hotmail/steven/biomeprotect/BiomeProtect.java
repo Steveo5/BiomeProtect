@@ -1,10 +1,15 @@
 package com.hotmail.steven.biomeprotect;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.hotmail.steven.biomeprotect.commands.CmdFlags;
@@ -28,10 +33,12 @@ import com.hotmail.steven.biomeprotect.menubuilder.MenuBuilderListener;
 import com.hotmail.steven.biomeprotect.region.RegionSaveTask;
 import com.hotmail.steven.biomeprotect.storage.RegionConfig;
 import com.hotmail.steven.biomeprotect.storage.RegionData;
+import com.hotmail.steven.biomeprotect.storage.SessionData;
 
 public class BiomeProtect extends JavaPlugin {
 	
 	private RegionData regionData;
+	private SessionData sessionData;
 	private static BiomeProtect plugin;
 	private static RegionMenu menu;
 	private FlagHolder flagHolder;
@@ -85,6 +92,8 @@ public class BiomeProtect extends JavaPlugin {
 		
 		// Handle events for the menu builders
 		new MenuBuilderListener(this);
+		
+		sessionData = new SessionData(this);
 	
 		/**
 		 * Initiate the region data (loads all regions into memory)
@@ -93,7 +102,20 @@ public class BiomeProtect extends JavaPlugin {
 		regionSaveTask = new RegionSaveTask(this);
 		Bukkit.getScheduler().runTaskTimer(this, regionSaveTask, 20L * 10L, 20L * getConfig().getInt("database.interval.seconds"));
 		
-		visualizer = new RegionVisualizer(this);
+		LinkedList<Location> sessionRemoveQueue = new LinkedList<Location>();
+		Logger.Log(Level.ALL, "Loading previous visualization session queue");
+		// get all locations in the queue
+		for(String strLocation : sessionData.getSession("remove-queue"))
+		{
+			String[] locData = strLocation.split(",");
+			World w = Bukkit.getWorld(UUID.fromString(locData[0]));
+			int x = Integer.parseInt(locData[1]);
+			int y = Integer.parseInt(locData[2]);
+			int z = Integer.parseInt(locData[3]);
+			Location loc = new Location(w, x, y, z);
+			sessionRemoveQueue.add(loc);
+		}
+		visualizer = new RegionVisualizer(this, sessionRemoveQueue);
 		
 		/**
 		 * Register BiomeProtectCommands
@@ -135,6 +157,11 @@ public class BiomeProtect extends JavaPlugin {
 	public RegionData getRegionData()
 	{
 		return regionData;
+	}
+	
+	public SessionData getSessionData()
+	{
+		return sessionData;
 	}
 	
 	public static RegionMenu getMenu()
