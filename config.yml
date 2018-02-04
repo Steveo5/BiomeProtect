@@ -48,7 +48,7 @@ database:
   type: mysql
   # Time between saving the region data to the database
   interval:
-    seconds: 10
+    seconds: 500
   # Configure the connection type
   settings:
     # Configure the mysql settings
