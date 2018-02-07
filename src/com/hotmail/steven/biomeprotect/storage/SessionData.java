@@ -31,12 +31,12 @@ public class SessionData {
 		{
 			try {
 				file.createNewFile();
-				
-				cfg = YamlConfiguration.loadConfiguration(file);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
+		
+		cfg = YamlConfiguration.loadConfiguration(file);
 		
 	}
 	
@@ -47,7 +47,7 @@ public class SessionData {
 	 */
 	public List<String> getSession(String node)
 	{
-		if(cfg.isList(node))
+		if(cfg != null && cfg.isList(node))
 		{
 			return cfg.getStringList(node);
 		} else
@@ -63,6 +63,7 @@ public class SessionData {
 	 */
 	public void saveSession(String node, List<String> sessionData)
 	{
+		if(cfg == null) return;
 		// Remove old session data
 		if(cfg.isConfigurationSection(node)) cfg.set(node, null);
 		cfg.createSection(node);

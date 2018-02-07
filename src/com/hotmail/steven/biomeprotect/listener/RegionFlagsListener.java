@@ -89,8 +89,8 @@ public class RegionFlagsListener extends BiomeProtectListener {
 		{
 			StringFlag welcome = (StringFlag)region.getFlag("welcome-message");
 			OfflinePlayer owner = Bukkit.getOfflinePlayer(region.getOwner());
-			Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "title " + player.getName() + " title [{text:Entered " + owner.getName() + "'s region,color:gold}]");
-			Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "title " + player.getName() + " subtitle [{text:" + welcome.getValue() + ",color:blue}");
+			Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "title " + player.getName() + " title [{\"text\":\"Entered " + owner.getName() + "\'s region\",\"color\":\"gold\"}]");
+			Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "title " + player.getName() + " subtitle [{\"text\":\"" + welcome.getValue() + "\",\"color\":\"blue\"}]");
 		}
 	}
 	
@@ -105,8 +105,8 @@ public class RegionFlagsListener extends BiomeProtectListener {
 		{
 			StringFlag leave = (StringFlag)region.getFlag("leave-message");
 			OfflinePlayer owner = Bukkit.getOfflinePlayer(region.getOwner());
-			Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "title " + player.getName() + " title [{text:Left " + owner.getName() + "'s region,color:gold}]");
-			Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "title " + player.getName() + " subtitle [{text:" + leave.getValue() + ",color:blue}");
+			Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "title " + player.getName() + " title [{\"text\":\"Left " + owner.getName() + "\'s region\",\"color\":\"gold\"}]");
+			Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "title " + player.getName() + " subtitle [{\"text\":\"" + leave.getValue() + "\",\"color\":\"blue\"}]");
 		}
 	}
 	

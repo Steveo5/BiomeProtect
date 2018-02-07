@@ -19,7 +19,7 @@ public class Language {
 	// Hold the actual path to the log file
 	private static String filePath;
 	private static File file;
-	private static boolean ready = false;
+	private static boolean ready = true;
 
 	/**
 	 * Initializes the logger and allows logging to file
@@ -51,10 +51,10 @@ public class Language {
 			// Add defaults from our local resource
 			fos.write(buffer);
 			fos.close();
-			ready = true;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		ready = true;
 	}
 	
 	public static String tl(String obj, String... replacers)

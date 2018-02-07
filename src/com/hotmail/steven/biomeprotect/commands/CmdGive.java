@@ -24,16 +24,16 @@ public class CmdGive extends BiomeProtectCommand {
 	}
 	
 	@Override
-	public boolean run(CommandSender sender, String name, String[] args)
+	public boolean run(CommandSender sender, String name, String[] args) throws Exception
 	{
-		if(args.length > 1)
+		if(args.length > 0)
 		{
-			if(getPlugin().getConfig().isConfigurationSection("protection-stones." + args[1]))
+			if(getPlugin().getConfig().isConfigurationSection("protection-stones." + args[0]))
 			{
 				Player recieve = null;
 				ItemStack item = null;
 				
-				ConfigurationSection section = getPlugin().getConfig().getConfigurationSection("protection-stones." + args[1]);
+				ConfigurationSection section = getPlugin().getConfig().getConfigurationSection("protection-stones." + args[0]);
 				// Create the item
 				item = new ItemStack(Material.valueOf(section.getString("block").toUpperCase()));
 				// Set the item meta if applicable
@@ -54,9 +54,9 @@ public class CmdGive extends BiomeProtectCommand {
 					item.setItemMeta(im);
 				}
 				// Check if the player is giving another player
-				if(args.length > 2)
+				if(args.length > 1)
 				{
-					recieve = Bukkit.getPlayer(args[2]);
+					recieve = Bukkit.getPlayer(args[1]);
 					if(recieve == null)
 					{
 						sender.sendMessage(tl("unknownPlayer"));
@@ -68,7 +68,7 @@ public class CmdGive extends BiomeProtectCommand {
 				{
 					recieve = (Player)sender;
 				}
-					Logger.Log(Level.INFO, "Giving " + args[1]);
+					Logger.Log(Level.INFO, "Giving " + args[0]);
 				// Give the reciever the protection stone
 				if(recieve != null && item != null)
 				{
@@ -76,13 +76,12 @@ public class CmdGive extends BiomeProtectCommand {
 				}
 			} else
 			{
-				sender.sendMessage(tl("unknownProtectionStone"));
+				throw new Exception(tl("unknownProtectionStone"));
 			}
 		} else
 		{
-			sender.sendMessage(tl("unknownProtectionStone"));
+			throw new Exception(tl("unknownProtectionStone"));
 		}
-		
 		return true;
 	}
 

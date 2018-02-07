@@ -26,6 +26,7 @@ public class CommandListener implements CommandExecutor {
 		// Check if there are any args
 		if(args.length < 1)
 		{
+			sender.sendMessage("test");
 			sender.sendMessage(tl("unknownCommand"));
 			return true;
 		}
@@ -46,8 +47,6 @@ public class CommandListener implements CommandExecutor {
 				return true;
 			}
 		}
-		
-		sender.sendMessage(tl("unknownCommand"));
 		/*
 		if(args.length > 0)
 		{

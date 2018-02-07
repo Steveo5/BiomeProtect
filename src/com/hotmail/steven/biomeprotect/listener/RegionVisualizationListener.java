@@ -18,8 +18,8 @@ public class RegionVisualizationListener extends BiomeProtectListener {
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent evt)
 	{
-		if(BiomeProtect.getVisualizer().getQueue().contains(evt.getBlock())
-				|| BiomeProtect.getVisualizer().getRemoveQueue().contains(evt.getBlock()))
+		if(BiomeProtect.getVisualizer().getQueue().contains(evt.getBlock().getLocation())
+				|| BiomeProtect.getVisualizer().getRemoveQueue().contains(evt.getBlock().getLocation()))
 		{
 			tl(evt.getPlayer(), "errorVisualization");
 			evt.setCancelled(true);
@@ -29,8 +29,8 @@ public class RegionVisualizationListener extends BiomeProtectListener {
 	@EventHandler
 	public void onBlockPlace(BlockPlaceEvent evt)
 	{
-		if(BiomeProtect.getVisualizer().getQueue().contains(evt.getBlock())
-				|| BiomeProtect.getVisualizer().getRemoveQueue().contains(evt.getBlock()))
+		if(BiomeProtect.getVisualizer().getQueue().contains(evt.getBlock().getLocation())
+				|| BiomeProtect.getVisualizer().getRemoveQueue().contains(evt.getBlock().getLocation()))
 		{
 			tl(evt.getPlayer(), "errorVisualization");
 			evt.setCancelled(true);

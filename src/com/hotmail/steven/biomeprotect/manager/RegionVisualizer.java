@@ -28,7 +28,9 @@ public class RegionVisualizer {
 	 * Blocks waiting to be visualized
 	 */
 	private Queue<Visualization> visuals;
+	// Queue to be shown
 	private Queue<Location> blockQueue;
+	// Queue to be hidden
 	private Queue<Location> removeQueue;
 	private BiomeProtect plugin;
 	
@@ -37,11 +39,11 @@ public class RegionVisualizer {
 	 * @param plugin
 	 * @param sessionRemoveQueue blocks left in queue that still need to be removed
 	 */
-	public RegionVisualizer(BiomeProtect plugin, LinkedList<Location> sessionRemoveQueue)
+	public RegionVisualizer(BiomeProtect plugin, LinkedList<Location> removeQueue, LinkedList<Location> blockQueue)
 	{
 		visuals = new LinkedList<Visualization>();
-		blockQueue = new LinkedList<Location>();
-		this.removeQueue = sessionRemoveQueue;
+		this.blockQueue = blockQueue;
+		this.removeQueue = removeQueue;
 		this.plugin = plugin;
 		
         // Create the task anonymously and schedule to run it once, after 20 ticks
@@ -58,9 +60,12 @@ public class RegionVisualizer {
                 	// Visualization needs to be removed
                 	if(System.currentTimeMillis() > (visualization.getStartTime() + (visualization.getLength() * 1000)))
                 	{
-                		Logger.Log(Level.INFO, "Removing viauzliation");
-                		removeQueue.addAll(visualization.getBlocks());
-                		itr.remove();
+                		if(visualization.isVisible())
+                		{
+	                		Logger.Log(Level.INFO, "Removing viauzliation");
+	                		removeQueue.addAll(visualization.getBlocks());
+	                		visualization.setVisible(false);
+                		}
                 	}
                 }
             }
@@ -146,6 +151,7 @@ public class RegionVisualizer {
 	{
 		blockQueue.addAll(visualization.getBlocks());
 		visuals.add(visualization);
+		visualization.setVisible(true);
 	}
 	
 	/**
@@ -192,17 +198,7 @@ public class RegionVisualizer {
 				}
 			}
 		}
-		
-		// Save the current session in case of crash or restart
-		List<String> strQueue = new ArrayList<String>();
-		for(Location loc : removeQueue)
-		{
-			// Essentially serialize
-			String strLoc = loc.getWorld().getUID().toString() + "," + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ();
-			strQueue.add(strLoc);
-		}
-		plugin.getSessionData().saveSession("remove-queue", strQueue);
-	}
+	}	
 	
 	/**
 	 * Get blocks waiting to be visualized
@@ -220,5 +216,24 @@ public class RegionVisualizer {
 	public Queue<Location> getRemoveQueue()
 	{
 		return removeQueue;
+	}
+	
+	/**
+	 * Essentially serializes a queue into a string queue
+	 * @param queue
+	 * @return
+	 */
+	public List<String> createSession(Queue<Location> queue)
+	{
+		// Save the current session in case of crash or restart
+		List<String> strQueue = new ArrayList<String>();
+		for(Location loc : queue)
+		{
+			// Essentially serialize
+			String strLoc = loc.getWorld().getUID().toString() + "," + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ();
+			strQueue.add(strLoc);
+			System.out.println("adding " + strLoc);
+		}
+		return strQueue;
 	}
 }

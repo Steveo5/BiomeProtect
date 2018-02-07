@@ -115,7 +115,21 @@ public class BiomeProtect extends JavaPlugin {
 			Location loc = new Location(w, x, y, z);
 			sessionRemoveQueue.add(loc);
 		}
-		visualizer = new RegionVisualizer(this, sessionRemoveQueue);
+		
+		LinkedList<Location> sessionBlockQueue = new LinkedList<Location>();
+		Logger.Log(Level.ALL, "Loading previous visualization session queue");
+		// get all locations in the queue
+		for(String strLocation : sessionData.getSession("block-queue"))
+		{
+			String[] locData = strLocation.split(",");
+			World w = Bukkit.getWorld(UUID.fromString(locData[0]));
+			int x = Integer.parseInt(locData[1]);
+			int y = Integer.parseInt(locData[2]);
+			int z = Integer.parseInt(locData[3]);
+			Location loc = new Location(w, x, y, z);
+			sessionRemoveQueue.add(loc);
+		}
+		visualizer = new RegionVisualizer(this, sessionRemoveQueue, sessionBlockQueue);
 		
 		/**
 		 * Register BiomeProtectCommands

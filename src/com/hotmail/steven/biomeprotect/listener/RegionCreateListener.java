@@ -5,6 +5,7 @@ import static com.hotmail.steven.biomeprotect.Language.tl;
 import java.util.HashSet;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -67,6 +68,8 @@ public class RegionCreateListener extends BiomeProtectListener {
 			Location blockLoc = evt.getBlock().getLocation();
 			player.sendMessage(tl("regionPlaced", new String[] {"%x%", String.valueOf(blockLoc.getBlockX()), "%y%", String.valueOf(blockLoc.getBlockY()),
 					"%z%", String.valueOf(blockLoc.getBlockZ())}));
+			Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "title " + player.getName() + " title [{\"text\":\"Protection placed\",\"color\":\"gold\"}]");
+			Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "title " + player.getName() + " subtitle [{\"text\":\"Right-click the block to configure it\",\"color\":\"blue\"}]");
 			// Finally save the region to database
 			getPlugin().getRegionData().getConnection().saveRegion(region);
 		}
