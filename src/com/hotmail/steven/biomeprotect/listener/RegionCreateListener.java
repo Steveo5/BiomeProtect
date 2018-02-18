@@ -12,6 +12,7 @@ import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 
@@ -75,12 +76,12 @@ public class RegionCreateListener extends BiomeProtectListener {
 		}
 	}
 	
-	@EventHandler
+	@EventHandler (priority = EventPriority.HIGHEST)
 	public void onBlockBreak(BlockBreakEvent evt)
 	{
 		// Query to see if the player removed a region
 		ProtectedRegion region = getPlugin().getRegionContainer().queryRegion(evt.getBlock().getLocation());
-		if(region != null)
+		if(region != null && !evt.isCancelled())
 		{
 			// Delete the region
 			getPlugin().getRegionContainer().removeRegion(region);
